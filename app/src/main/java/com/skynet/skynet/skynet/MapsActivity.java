@@ -1,12 +1,15 @@
 package com.skynet.skynet.skynet;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.Point;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
 import android.content.Intent;
@@ -22,8 +25,12 @@ import butterknife.OnClick;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
@@ -45,6 +52,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     private LocationManager locationManager;
     private static final long MIN_TIME = 400;
     private static final float MIN_DISTANCE = 1000;
+    private Circle mCircle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +61,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         ButterKnife.bind(this);
         setUpMapIfNeeded();
         mMap.setMyLocationEnabled(true);
+        View fragView = findViewById(R.id.map);
         myToolbar.setTitle("Hermes");
         setSupportActionBar(myToolbar);
 
@@ -81,6 +90,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         } else {
             mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         }
+        logCornerLatsAndLongs();
     }
 
     /**
@@ -112,6 +122,22 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         }
     }
 
+    private void logCornerLatsAndLongs() {
+        LatLng botleft = mMap.getProjection()
+                .getVisibleRegion().nearLeft;
+
+        LatLng botright = mMap.getProjection()
+                .getVisibleRegion().nearRight;
+
+        LatLng topleft = mMap.getProjection()
+                .getVisibleRegion().farLeft;
+
+        LatLng topright = mMap.getProjection()
+                .getVisibleRegion().farRight;
+
+        Log.v("saif", " " + botleft + " " + botright + " " + topleft + " " + topright + " ");
+    }
+
     /**
      * This is where we can add markers or lines, add listeners or move the camera. In this case, we
      * just add a marker near Africa.
@@ -119,15 +145,29 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
-        mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+    }
+
+    private void createCircleAroundPoint(LatLng latlng) {
+        if(mCircle == null) {
+            Color color = new Color();
+
+            mCircle = mMap.addCircle(new CircleOptions()
+                    .center(latlng)
+                    .radius(10000) // this is in meters
+                    .strokeColor(Color.RED)
+                    .fillColor(0x73DB5E5E));
+        }
     }
 
     @Override
     public void onLocationChanged(Location location) {
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        createCircleAroundPoint(latLng);
         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 10);
         mMap.animateCamera(cameraUpdate);
         locationManager.removeUpdates(this);
+        createCircleAroundPoint(latLng);
+
     }
 
     @Override
