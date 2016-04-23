@@ -2,11 +2,17 @@ package com.skynet.skynet.skynet;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class MapsActivity extends AppCompatActivity {
 
@@ -17,12 +23,23 @@ public class MapsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         setUpMapIfNeeded();
+        ButterKnife.bind(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         setUpMapIfNeeded();
+    }
+
+    @OnClick(R.id.btn_map_toggle)
+    public void mapTypeToggle() {
+        if(mMap.getMapType() == GoogleMap.MAP_TYPE_NORMAL) {
+        mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+//        Toast.makeText(this, "Satellite", Toast.LENGTH_SHORT).show();
+        } else {
+            mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        }
     }
 
     /**
