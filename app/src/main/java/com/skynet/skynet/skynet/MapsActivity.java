@@ -288,7 +288,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                     airports = new ArrayList<Airport>();
                     for (int i = 0; i < jsonAirports.length(); i++) {
                         airports.add(new Airport(jsonAirports.getJSONObject(i)));
-
                     }
                     drawAirports(airports);
                 } catch (JSONException e) {
@@ -308,14 +307,30 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                 }
                 circlesAdded.clear();
 
+                int x = 0;
                 for(Airport airport: airports) {
+                    x ++;
+                    if(x > 100) {
+                        break;
+                    }
+                    int radius = 0;
+                    switch (airport.sizeLevel) {
+                        case 0:
+                            radius = 5630;// 3.5 miles
+                            break;
+                        case 1:
+                            radius = 8046;// 6.5 miles
+                            break;
+                        case 2:
+                            radius = 11000;// 8.5 miles
+                            break;
 
+                    }
                     circlesAdded.add(mMap.addCircle(new CircleOptions()
                             .center(new LatLng(airport.lat, airport.lon))
-                            .radius(10000) // this is in meters
+                            .radius(radius) // this is in meters
                             .strokeColor(Color.BLUE)
                             .fillColor(0x730000ff)));
-
                 }
             }
         });
