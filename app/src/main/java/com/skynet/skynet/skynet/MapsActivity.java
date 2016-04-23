@@ -33,10 +33,12 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -49,6 +51,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private Context context;
     private WeatherData weatherData;
+    private ArrayList<Airport> airports;
 
     @Bind(R.id.my_toolbar)
     public Toolbar myToolbar;
@@ -76,6 +79,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
 
         try {
             callWeatherAPI(getWeatherURL(43.4643, 80.5204));
+            callCustomAPI(getCustomURL());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -211,7 +215,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
 
     private final OkHttpClient client = new OkHttpClient();
 
-    public void callWeatherAPI(String url) throws Exception {
+    private void callWeatherAPI(String url) throws Exception {
         Request request = new Request.Builder()
                 .url(url)
                 .build();
@@ -230,6 +234,41 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                     e.printStackTrace();
                 }
 //                System.out.println(response.body().string());
+            }
+        });
+    }
+
+    private String getCustomURL() {
+//        return "https://skynet-server.herokuapp.com/airportsin?lat1=" + lat1 + "&lon1=" + lon1
+//                + "&lat2=" + lat2 + "&lon2=" + lon2 + "&lat3=" + lat3 + "&lon3=" + lon3 + "&lat4="
+//                + lat4 + "&lon4=" + lon4;
+        return "https://skynet-server.herokuapp.com/airportsin?lat1=43.57844659660155&lon1=-79.52642306685448&lat2=43.57844659660155&lon2=-79.24182560294867&lat3=43.897733906604834&lon3=-79.24182560294867&lat4=43.897733906604834&lon4=-79.52642306685448";
+    }
+
+    private void callCustomAPI(String url) throws Exception {
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override public void onResponse(Call call, Response response) throws IOException {
+                if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+                try {
+                    JSONObject responseObject = new JSONObject(response.body().string());
+                    JSONArray jsonAirports = responseObject.getJSONArray("airportsin");
+                    airports = new ArrayList<Airport>();
+                    for (int i = 0; i < jsonAirports.length(); i++) {
+                        airports.add(new Airport(jsonAirports.getJSONObject(i)));
+                    }
+                    System.out.println(airports.size());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
