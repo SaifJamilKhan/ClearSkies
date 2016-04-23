@@ -15,6 +15,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 import android.content.Intent;
 import android.os.Bundle;
@@ -62,6 +63,10 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
 
     @Bind(R.id.my_toolbar)
     public Toolbar myToolbar;
+
+    @Bind(R.id.btn_map_toggle)
+    public ImageButton btnMapToggle;
+
 
     private LocationManager locationManager;
     private static final long MIN_TIME = 400;
@@ -126,11 +131,13 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     }
 
     @OnClick(R.id.btn_map_toggle)
-    public void mapTypeToggle() {
+    public void mapTypeToggle(ImageButton button) {
         if(mMap.getMapType() == GoogleMap.MAP_TYPE_NORMAL) {
             mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+            button.setImageResource(R.drawable.google_maps_img);
         } else {
             mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+            button.setImageResource(R.drawable.google_earth_mdpi);
         }
 //        logCornerLatsAndLongs();
     }
@@ -263,7 +270,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-//                System.out.println(response.body().string());
             }
         });
     }
@@ -272,7 +278,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         return "https://skynet-server.herokuapp.com/airportsin?lat1=" + botLeft.latitude + "&lon1=" + botLeft.longitude
                 + "&lat2=" + botRight.latitude + "&lon2=" + botRight.longitude + "&lat3=" + topLeft.latitude + "&lon3=" + topLeft.longitude + "&lat4="
                 + topRight.latitude + "&lon4=" + topRight.longitude;
-//        return "https://skynet-server.herokuapp.com/airportsin?lat1=43.57844659660155&lon1=-79.52642306685448&lat2=43.57844659660155&lon2=-79.24182560294867&lat3=43.897733906604834&lon3=-79.24182560294867&lat4=43.897733906604834&lon4=-79.52642306685448";
     }
 
     private void callCustomAPI(String url) throws Exception {
@@ -315,14 +320,31 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                 }
                 circlesAdded.clear();
 
-                for(Airport airport: airports) {
+                int x = 0;
+                for(int y = 0; y < airports.size(); y ++) {
+                    Airport airport = airports.get(y);
+                    x ++;
+                    if(x > 100) {
+                        break;
+                    }
+                    int radius = 0;
+                    switch (airport.sizeLevel) {
+                        case 0:
+                            radius = 5630;// 3.5 miles
+                            break;
+                        case 1:
+                            radius = 8046;// 6.5 miles
+                            break;
+                        case 2:
+                            radius = 11000;// 8.5 miles
+                            break;
 
+                    }
                     circlesAdded.add(mMap.addCircle(new CircleOptions()
                             .center(new LatLng(airport.lat, airport.lon))
-                            .radius(10000) // this is in meters
+                            .radius(radius) // this is in meters
                             .strokeColor(Color.BLUE)
                             .fillColor(0x730000ff)));
-
                 }
             }
         });

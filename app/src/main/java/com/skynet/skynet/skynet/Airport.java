@@ -15,6 +15,7 @@ public class Airport {
     public String continent;
     public String name;
     public String size;
+    public int sizeLevel; // 0 = small, 1 = medium, 2 = large
 
 
     public Airport(JSONObject jsonObject) {
@@ -26,6 +27,20 @@ public class Airport {
             this.continent = jsonObject.getString("continent");
             this.name = jsonObject.getString("name");
             this.size = jsonObject.getString("size");
+            switch (size) {
+                case "small":
+                    sizeLevel = 0;
+                    break;
+                case "medium":
+                    sizeLevel = 1;
+                    break;
+                case "large":
+                    sizeLevel = 2;
+                    break;
+                default:
+                    sizeLevel = 0;
+                    break;
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
