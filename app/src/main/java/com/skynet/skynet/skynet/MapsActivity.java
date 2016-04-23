@@ -1,12 +1,14 @@
 package com.skynet.skynet.skynet;
 
 import android.content.Context;
+import android.graphics.Point;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
 import android.content.Intent;
@@ -18,8 +20,10 @@ import android.widget.Button;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import butterknife.Bind;
@@ -45,6 +49,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         ButterKnife.bind(this);
         setUpMapIfNeeded();
         mMap.setMyLocationEnabled(true);
+        View fragView = findViewById(R.id.map);
         myToolbar.setTitle("Hermes");
         setSupportActionBar(myToolbar);
 
@@ -73,6 +78,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         } else {
             mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         }
+        logCornerLatsAndLongs();
     }
 
     /**
@@ -104,6 +110,22 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         }
     }
 
+    private void logCornerLatsAndLongs() {
+        LatLng botleft = mMap.getProjection()
+                .getVisibleRegion().nearLeft;
+
+        LatLng botright = mMap.getProjection()
+                .getVisibleRegion().nearRight;
+
+        LatLng topleft = mMap.getProjection()
+                .getVisibleRegion().farLeft;
+
+        LatLng topright = mMap.getProjection()
+                .getVisibleRegion().farRight;
+
+        Log.v("saif", " " + botleft + " " + botright + " " + topleft + " " + topright + " ");
+    }
+
     /**
      * This is where we can add markers or lines, add listeners or move the camera. In this case, we
      * just add a marker near Africa.
@@ -111,7 +133,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
-        mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
     }
 
     @Override
