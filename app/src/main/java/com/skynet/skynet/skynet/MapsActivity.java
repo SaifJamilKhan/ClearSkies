@@ -229,7 +229,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                System.out.println(response.body().string());
+//                System.out.println(response.body().string());
             }
         });
     }

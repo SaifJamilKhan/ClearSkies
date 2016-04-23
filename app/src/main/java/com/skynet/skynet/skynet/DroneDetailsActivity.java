@@ -7,6 +7,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
 
+import java.util.ArrayList;
+
 public class DroneDetailsActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
@@ -26,9 +28,14 @@ public class DroneDetailsActivity extends AppCompatActivity {
         }
 
         weatherData = (WeatherData) getIntent().getSerializableExtra("weatherData");
+        ArrayList<SingleWeatherStat> singleWeatherStats = new ArrayList<>();
+        singleWeatherStats.add(new SingleWeatherStat("Temperature", weatherData.temp));
+        singleWeatherStats.add(new SingleWeatherStat("Pressure", weatherData.pressure));
+        singleWeatherStats.add(new SingleWeatherStat("Humidity", weatherData.humidity));
+        singleWeatherStats.add(new SingleWeatherStat("Wind Speed", weatherData.windSpeed));
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        adapter = new DroneDetailsAdapter();
+        adapter = new DroneDetailsAdapter(singleWeatherStats);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());

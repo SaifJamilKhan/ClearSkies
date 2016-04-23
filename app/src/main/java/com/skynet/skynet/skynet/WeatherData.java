@@ -4,6 +4,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 /**
  * Created by mohamed on 2016-04-23.
@@ -30,5 +31,4 @@ public class WeatherData implements Serializable {
             e.printStackTrace();
         }
     }
-
 }

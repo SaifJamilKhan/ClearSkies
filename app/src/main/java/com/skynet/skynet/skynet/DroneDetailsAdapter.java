@@ -4,22 +4,35 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+
+import java.util.ArrayList;
 
 /**
  * Created by mohamed on 2016-04-23.
  */
 public class DroneDetailsAdapter extends RecyclerView.Adapter<DroneDetailsAdapter.MyViewHolder> {
 
+    private ArrayList<SingleWeatherStat> singleWeatherStats;
+
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
-        public MyViewHolder(View view) {
+        public TextView statTitleTV, statNumTV;
+
+        public MyViewHolder(View view, int viewType) {
             super(view);
+            if (viewType == 0) {
+
+            } else {
+                statTitleTV = (TextView) view.findViewById(R.id.statTitle);
+                statNumTV = (TextView) view.findViewById(R.id.statNum);
+            }
         }
     }
 
 
-    public DroneDetailsAdapter() {
-
+    public DroneDetailsAdapter(ArrayList<SingleWeatherStat> singleWeatherStats) {
+        this.singleWeatherStats = singleWeatherStats;
     }
 
     @Override
@@ -29,15 +42,12 @@ public class DroneDetailsAdapter extends RecyclerView.Adapter<DroneDetailsAdapte
             case 0:
                 itemView = LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.drone_details_picture_row, parent, false);
-                break;
+                return new MyViewHolder(itemView, viewType);
             default:
                 itemView = LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.drone_details_info_row, parent, false);
-                break;
+                return new MyViewHolder(itemView, viewType);
         }
-
-
-        return new MyViewHolder(itemView);
     }
 
     @Override
@@ -45,7 +55,9 @@ public class DroneDetailsAdapter extends RecyclerView.Adapter<DroneDetailsAdapte
         if (position == 0) {
 
         } else {
-
+            SingleWeatherStat singleWeatherStat = singleWeatherStats.get(position - 1);
+            holder.statTitleTV.setText(singleWeatherStat.title);
+            holder.statNumTV.setText(Double.toString(singleWeatherStat.value));
         }
     }
 
@@ -60,6 +72,6 @@ public class DroneDetailsAdapter extends RecyclerView.Adapter<DroneDetailsAdapte
 
     @Override
     public int getItemCount() {
-        return 0;
+        return singleWeatherStats.size() + 1; // + 1 for the drone image
     }
 }
