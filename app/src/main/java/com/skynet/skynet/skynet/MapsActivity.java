@@ -12,6 +12,14 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.IOException;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 public class MapsActivity extends AppCompatActivity {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
@@ -78,5 +86,30 @@ public class MapsActivity extends AppCompatActivity {
      */
     private void setUpMap() {
         mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+    }
+
+    private String getWeatherURL(float lat, float lon) {
+        return "api.openweathermap.org/data/2.5/weather?lat=" + Float.toString(lat) + "&lon="
+                + Float.toString(lon) + "?id=524901&APPID=7a8668b5c3f71c0608b503bdd446c3c1";
+    }
+
+    private final OkHttpClient client = new OkHttpClient();
+
+    public void callWeatherAPI(String url) throws Exception {
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override public void onResponse(Call call, Response response) throws IOException {
+                if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+                System.out.println(response.body().string());
+            }
+        });
     }
 }
