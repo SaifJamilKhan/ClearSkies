@@ -21,7 +21,7 @@
         android:layout_below="@id/my_toolbar"
         android:id="@+id/map"
         tools:context=".MapsActivity"
-        android:name="com.google.android.gms.maps.SupportMapFragment" />
+        android:name="com.google.android.gms.maps.SupportMapFragment"/>
 
     <ImageButton
         android:id="@+id/btn_map_toggle"
@@ -35,4 +35,15 @@
         android:layout_marginLeft="10dp"
         android:background="@null"/>
 
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="50dp"
+            android:layout_marginRight="50dp"
+            android:id="@+id/detailsButton"
+            android:text="Stay Saif"/>
+
 </RelativeLayout>
+

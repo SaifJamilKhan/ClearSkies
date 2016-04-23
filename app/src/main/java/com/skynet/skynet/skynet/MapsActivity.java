@@ -9,6 +9,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.Button;
 import android.widget.Toast;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.Button;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -24,9 +29,11 @@ import butterknife.OnClick;
 public class MapsActivity extends AppCompatActivity implements LocationListener {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+    private Context context;
 
     @Bind(R.id.my_toolbar)
     public Toolbar myToolbar;
+
     private LocationManager locationManager;
     private static final long MIN_TIME = 400;
     private static final float MIN_DISTANCE = 1000;
@@ -43,6 +50,14 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME, MIN_DISTANCE, this); //You can also use LocationManager.GPS_PROVIDER and LocationManager.PASSIVE_PROVIDER
+
+        context = this;
+    }
+
+    @OnClick(R.id.detailsButton)
+    public void detailsButtonPressed() {
+        Intent intent = new Intent(context, DroneDetailsActivity.class);
+        startActivity(intent);
     }
 
     @Override
