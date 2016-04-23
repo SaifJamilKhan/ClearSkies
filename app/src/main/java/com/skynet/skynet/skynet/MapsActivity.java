@@ -257,7 +257,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-//                System.out.println(response.body().string());
             }
         });
     }
@@ -266,7 +265,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         return "https://skynet-server.herokuapp.com/airportsin?lat1=" + botLeft.latitude + "&lon1=" + botLeft.longitude
                 + "&lat2=" + botRight.latitude + "&lon2=" + botRight.longitude + "&lat3=" + topLeft.latitude + "&lon3=" + topLeft.longitude + "&lat4="
                 + topRight.latitude + "&lon4=" + topRight.longitude;
-//        return "https://skynet-server.herokuapp.com/airportsin?lat1=43.57844659660155&lon1=-79.52642306685448&lat2=43.57844659660155&lon2=-79.24182560294867&lat3=43.897733906604834&lon3=-79.24182560294867&lat4=43.897733906604834&lon4=-79.52642306685448";
     }
 
     private void callCustomAPI(String url) throws Exception {
@@ -308,7 +306,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                 circlesAdded.clear();
 
                 int x = 0;
-                for(Airport airport: airports) {
+                for(int y = 0; y < airports.size(); y ++) {
+                    Airport airport = airports.get(y);
                     x ++;
                     if(x > 100) {
                         break;
