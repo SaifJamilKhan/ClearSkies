@@ -60,6 +60,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     private static final float MIN_DISTANCE = 1000;
     private Circle mCircle;
 
+    private ArrayList<Circle> circlesAdded = new ArrayList<>() ;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,7 +69,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         ButterKnife.bind(this);
         setUpMapIfNeeded();
         mMap.setMyLocationEnabled(true);
-        View fragView = findViewById(R.id.map);
         myToolbar.setTitle("Hermes");
         setSupportActionBar(myToolbar);
 
@@ -186,7 +187,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         if(mCircle == null) {
             mCircle = mMap.addCircle(new CircleOptions()
                     .center(latlng)
-                    .radius(10000) // this is in meters
+                    .radius(4000) // this is in meters
                     .strokeColor(Color.RED)
                     .fillColor(0x73DB5E5E));
         }
@@ -290,8 +291,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
 
                     }
                     drawAirports(airports);
-                    Log.v("saif", "airports  found " + airports.size());
-                    System.out.println(airports.size());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -299,17 +298,27 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         });
     }
 
-    private void drawAirports(ArrayList<Airport> airports) {
+    private void drawAirports(final ArrayList<Airport> airports) {
 
-        for(Airport airport: airports) {
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                for(Circle circle : circlesAdded) {
+                    circle.remove();
+                }
+                circlesAdded.clear();
 
-            mCircle = mMap.addCircle(new CircleOptions()
-                    .center(new LatLng(airport.lat, airport.lon))
-                    .radius(1000) // this is in meters
-                    .strokeColor(Color.BLUE)
-                    .fillColor(0x730000ff));
+                for(Airport airport: airports) {
 
-        }
+                    circlesAdded.add(mMap.addCircle(new CircleOptions()
+                            .center(new LatLng(airport.lat, airport.lon))
+                            .radius(10000) // this is in meters
+                            .strokeColor(Color.BLUE)
+                            .fillColor(0x730000ff)));
+
+                }
+            }
+        });
 
     }
 }
