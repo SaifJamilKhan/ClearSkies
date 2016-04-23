@@ -78,7 +78,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         context = this;
 
         try {
-            callWeatherAPI(getWeatherURL(43.4643, 80.5204));
             callCustomAPI(getCustomURL());
         } catch (Exception e) {
             e.printStackTrace();
@@ -87,9 +86,13 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
 
     @OnClick(R.id.detailsButton)
     public void detailsButtonPressed() {
-        Intent intent = new Intent(context, DroneDetailsActivity.class);
-        intent.putExtra("weatherData", weatherData);
-        startActivity(intent);
+        if(weatherData != null) {
+            Intent intent = new Intent(context, DroneDetailsActivity.class);
+            intent.putExtra("weatherData", weatherData);
+            startActivity(intent);
+        } else {
+            Toast.makeText(this, "Location and weather not yet available", Toast.LENGTH_SHORT).show();;
+        }
     }
 
     @Override
@@ -182,6 +185,11 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         mMap.animateCamera(cameraUpdate);
         locationManager.removeUpdates(this);
         createCircleAroundPoint(latLng);
+        try {
+            callWeatherAPI(getWeatherURL(latLng.latitude, latLng.longitude));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
