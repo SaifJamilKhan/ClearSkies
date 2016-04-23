@@ -57,7 +57,11 @@ public class DroneDetailsAdapter extends RecyclerView.Adapter<DroneDetailsAdapte
         } else {
             SingleWeatherStat singleWeatherStat = singleWeatherStats.get(position - 1);
             holder.statTitleTV.setText(singleWeatherStat.title);
-            holder.statNumTV.setText(Double.toString(singleWeatherStat.value));
+            if (singleWeatherStat.title.equals("Wind Direction")) {
+                holder.statNumTV.setText(degToCardinal(singleWeatherStat.value));
+            } else {
+                holder.statNumTV.setText(Double.toString(singleWeatherStat.value));
+            }
         }
     }
 
@@ -73,5 +77,10 @@ public class DroneDetailsAdapter extends RecyclerView.Adapter<DroneDetailsAdapte
     @Override
     public int getItemCount() {
         return singleWeatherStats.size() + 1; // + 1 for the drone image
+    }
+
+    private String degToCardinal(double x) {
+        String directions[] = {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
+        return directions[ (int)Math.round(( (x % 360) / 45)) % 8 ];
     }
 }

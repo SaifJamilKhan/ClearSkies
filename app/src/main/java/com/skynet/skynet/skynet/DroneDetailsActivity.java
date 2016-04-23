@@ -33,6 +33,7 @@ public class DroneDetailsActivity extends AppCompatActivity {
         singleWeatherStats.add(new SingleWeatherStat("Pressure", weatherData.pressure));
         singleWeatherStats.add(new SingleWeatherStat("Humidity", weatherData.humidity));
         singleWeatherStats.add(new SingleWeatherStat("Wind Speed", weatherData.windSpeed));
+        singleWeatherStats.add(new SingleWeatherStat("Wind Direction", weatherData.windDirection));
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         adapter = new DroneDetailsAdapter(singleWeatherStats);

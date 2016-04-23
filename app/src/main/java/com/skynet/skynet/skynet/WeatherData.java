@@ -4,7 +4,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
 /**
  * Created by mohamed on 2016-04-23.
@@ -18,6 +17,7 @@ public class WeatherData implements Serializable {
     public double pressure;
     public double humidity;
     public double windSpeed;
+    public double windDirection;
 
     public WeatherData(JSONObject jsonObject) {
         try {
@@ -27,6 +27,7 @@ public class WeatherData implements Serializable {
             this.pressure = jsonObject.getJSONObject("main").getDouble("pressure");
             this.humidity = jsonObject.getJSONObject("main").getDouble("humidity");
             this.windSpeed = jsonObject.getJSONObject("wind").getDouble("speed");
+            this.windDirection = jsonObject.getJSONObject("wind").getDouble("deg");
         } catch (JSONException e) {
             e.printStackTrace();
         }
