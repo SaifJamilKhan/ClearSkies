@@ -1,6 +1,7 @@
 package com.skynet.skynet.skynet;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.location.Location;
 import android.location.LocationListener;
@@ -22,6 +23,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -41,6 +44,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     private LocationManager locationManager;
     private static final long MIN_TIME = 400;
     private static final float MIN_DISTANCE = 1000;
+    private Circle mCircle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,12 +139,27 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     private void setUpMap() {
     }
 
+    private void createCircleAroundPoint(LatLng latlng) {
+        if(mCircle == null) {
+            Color color = new Color();
+
+            mCircle = mMap.addCircle(new CircleOptions()
+                    .center(latlng)
+                    .radius(10000) // this is in meters
+                    .strokeColor(Color.RED)
+                    .fillColor(0x73DB5E5E));
+        }
+    }
+
     @Override
     public void onLocationChanged(Location location) {
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        createCircleAroundPoint(latLng);
         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 10);
         mMap.animateCamera(cameraUpdate);
         locationManager.removeUpdates(this);
+        createCircleAroundPoint(latLng);
+
     }
 
     @Override
