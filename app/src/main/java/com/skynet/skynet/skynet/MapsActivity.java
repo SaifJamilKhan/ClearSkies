@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 import android.content.Intent;
 import android.os.Bundle;
@@ -54,6 +55,10 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
 
     @Bind(R.id.my_toolbar)
     public Toolbar myToolbar;
+
+    @Bind(R.id.btn_map_toggle)
+    public ImageButton btnMapToggle;
+
 
     private LocationManager locationManager;
     private static final long MIN_TIME = 400;
@@ -121,11 +126,13 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     }
 
     @OnClick(R.id.btn_map_toggle)
-    public void mapTypeToggle() {
+    public void mapTypeToggle(ImageButton button) {
         if(mMap.getMapType() == GoogleMap.MAP_TYPE_NORMAL) {
             mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+            button.setImageResource(R.drawable.google_maps_img);
         } else {
             mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+            button.setImageResource(R.drawable.google_earth_mdpi);
         }
 //        logCornerLatsAndLongs();
     }
