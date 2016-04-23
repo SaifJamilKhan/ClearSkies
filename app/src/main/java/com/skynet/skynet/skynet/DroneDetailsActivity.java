@@ -11,6 +11,7 @@ public class DroneDetailsActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private DroneDetailsAdapter adapter;
+    private WeatherData weatherData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +24,8 @@ public class DroneDetailsActivity extends AppCompatActivity {
             ab.setElevation(0);
             ab.setDisplayShowTitleEnabled(false);
         }
+
+        weatherData = (WeatherData) getIntent().getSerializableExtra("weatherData");
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         adapter = new DroneDetailsAdapter();

@@ -33,6 +33,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 
 import okhttp3.Call;
@@ -45,6 +48,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private Context context;
+    private WeatherData weatherData;
 
     @Bind(R.id.my_toolbar)
     public Toolbar myToolbar;
@@ -69,11 +73,18 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME, MIN_DISTANCE, this); //You can also use LocationManager.GPS_PROVIDER and LocationManager.PASSIVE_PROVIDER
 
         context = this;
+
+        try {
+            callWeatherAPI(getWeatherURL(43.4643, 80.5204));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @OnClick(R.id.detailsButton)
     public void detailsButtonPressed() {
         Intent intent = new Intent(context, DroneDetailsActivity.class);
+        intent.putExtra("weatherData", weatherData);
         startActivity(intent);
     }
 
@@ -193,9 +204,9 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
 //        locationManager.removeUpdates(this);
 //    }
 
-    private String getWeatherURL(float lat, float lon) {
-        return "api.openweathermap.org/data/2.5/weather?lat=" + Float.toString(lat) + "&lon="
-                + Float.toString(lon) + "?id=524901&APPID=7a8668b5c3f71c0608b503bdd446c3c1";
+    private String getWeatherURL(double lat, double lon) {
+        return "http://api.openweathermap.org/data/2.5/weather?lat=" + Double.toString(lat) + "&lon="
+                + Double.toString(lon) + "&APPID=7a8668b5c3f71c0608b503bdd446c3c1";
     }
 
     private final OkHttpClient client = new OkHttpClient();
@@ -213,6 +224,11 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
             @Override public void onResponse(Call call, Response response) throws IOException {
                 if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
 
+                try {
+                    weatherData = new WeatherData(new JSONObject(response.body().string()));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
                 System.out.println(response.body().string());
             }
         });
