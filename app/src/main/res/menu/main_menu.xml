@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- "Mark Favorite", should appear as action button if possible -->
+    <item
+        android:id="@+id/action_toggle_drones"
+        android:icon="@drawable/ic_media_play"
+        android:title="Toggle Drones"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_toggle_airports"
+        android:icon="@drawable/abc_ic_menu_paste_mtrl_am_alpha"
+        android:title="Toggle Airports"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_toggle_self_circle"
+        android:icon="@drawable/ic_cast_light"
+        android:title="Toggle Self Circle"
+        app:showAsAction="never"/>
+
+
+</menu>

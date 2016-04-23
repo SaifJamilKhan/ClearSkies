@@ -14,6 +14,9 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -76,6 +79,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
 
     private ArrayList<Circle> circlesAdded = new ArrayList<>() ;
     private ArrayList<Circle> droneCirclesAdded = new ArrayList<>() ;
+    private LatLng mLatestLocationLatLng;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,6 +130,71 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    boolean showSelfCircle = true;
+    boolean showDroneCircles = true;
+    boolean showAirportCircles = true;
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.action_toggle_self_circle:
+                showSelfCircle = !showSelfCircle;
+                drawSelfCircle(showSelfCircle);
+                return true;
+            case R.id.action_toggle_airports:
+                showAirportCircles = !showAirportCircles;
+                drawAirportCircles(showAirportCircles);
+                return true;
+            case R.id.action_toggle_drones:
+                showDroneCircles = !showDroneCircles;
+                drawDroneCircles(showDroneCircles);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void drawDroneCircles(boolean shouldDraw) {
+        if(shouldDraw) {
+            drawDrones(drones);
+        } else {
+            for(Circle circle : droneCirclesAdded) {
+                circle.remove();
+            }
+            droneCirclesAdded.clear();
+        }
+    }
+
+    private void drawAirportCircles(boolean shouldDraw) {
+        if(shouldDraw) {
+            drawAirports(airports);
+        } else {
+            for(Circle circle : circlesAdded) {
+                circle.remove();
+            }
+            circlesAdded.clear();
+        }
+    }
+
+    private void drawSelfCircle(boolean shouldDraw) {
+        if(shouldDraw) {
+            createCircleAroundPoint(mLatestLocationLatLng);
+        } else {
+            if(mCircle != null) {
+                mCircle.remove();
+                mCircle = null;
+            }
+        }
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         setUpMapIfNeeded();
@@ -171,21 +240,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         }
     }
 
-    private void logCornerLatsAndLongs() {
-        LatLng botleft = mMap.getProjection()
-                .getVisibleRegion().nearLeft;
-
-        LatLng botright = mMap.getProjection()
-                .getVisibleRegion().nearRight;
-
-        LatLng topleft = mMap.getProjection()
-                .getVisibleRegion().farLeft;
-
-        LatLng topright = mMap.getProjection()
-                .getVisibleRegion().farRight;
-
-    }
-
     /**
      * This is where we can add markers or lines, add listeners or move the camera. In this case, we
      * just add a marker near Africa.
@@ -199,7 +253,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         if(mCircle == null) {
             mCircle = mMap.addCircle(new CircleOptions()
                     .center(latlng)
-                    .radius(4000) // this is in meters
+                    .radius(3000) // this is in meters
                     .strokeColor(Color.RED)
                     .fillColor(0x73DB5E5E));
         }
@@ -207,14 +261,14 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
 
     @Override
     public void onLocationChanged(Location location) {
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-        createCircleAroundPoint(latLng);
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 10);
+        mLatestLocationLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+        createCircleAroundPoint(mLatestLocationLatLng);
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(mLatestLocationLatLng, 10);
         mMap.animateCamera(cameraUpdate);
         locationManager.removeUpdates(this);
-        createCircleAroundPoint(latLng);
+        createCircleAroundPoint(mLatestLocationLatLng);
         try {
-            callWeatherAPI(getWeatherURL(latLng.latitude, latLng.longitude));
+            callWeatherAPI(getWeatherURL(mLatestLocationLatLng.latitude, mLatestLocationLatLng.longitude));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -299,7 +353,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                     JSONObject responseObject = new JSONObject(response.body().string());
                     JSONArray jsonAirports = responseObject.getJSONArray("airportsin");
                     JSONArray jsonDrones = responseObject.getJSONArray("dronesin");
-                    airports = new ArrayList<Airport>();
+                    airports = new ArrayList<>();
                     for (int i = 0; i < jsonAirports.length(); i++) {
                         if (jsonAirports.getJSONObject(i).has("lat") && jsonAirports.getJSONObject(i).has("lon")) {
                             airports.add(new Airport(jsonAirports.getJSONObject(i)));
@@ -310,7 +364,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                     for (int i = 0; i < jsonAirports.length(); i++) {
                         drones.add(new Drone(jsonDrones.getJSONObject(i)));
                     }
-                    Log.v("saif", "drones found " + drones.size());
                     drawDrones(drones);
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -376,7 +429,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
             @Override
             public void run() {
 
-                ArrayList<Drone> dronesToAdd = new ArrayList<Drone>();
+                ArrayList<Drone> dronesToAdd = new ArrayList<>();
                 int b = 0;
                 while(dronesToAdd.size() < 100 && b < drones.size()) {
                     dronesToAdd.add(drones.get(b));
