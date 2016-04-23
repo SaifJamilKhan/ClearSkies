@@ -8,13 +8,13 @@ import org.json.JSONObject;
  */
 public class Airport {
 
-    public double lat;
-    public double lon;
     public String iata;
     public String iso;
     public String continent;
     public String name;
     public String size;
+    public double lat;
+    public double lon;
     public int sizeLevel; // 0 = small, 1 = medium, 2 = large
 
 

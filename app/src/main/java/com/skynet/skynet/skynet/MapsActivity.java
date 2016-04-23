@@ -52,6 +52,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     private Context context;
     private WeatherData weatherData;
     private ArrayList<Airport> airports;
+    private ArrayList<Drone> drones;
 
     @Bind(R.id.my_toolbar)
     public Toolbar myToolbar;
@@ -81,7 +82,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME, MIN_DISTANCE, this); //You can also use LocationManager.GPS_PROVIDER and LocationManager.PASSIVE_PROVIDER
 
         context = this;
-
 
         mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override
@@ -134,7 +134,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
             mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
             button.setImageResource(R.drawable.google_earth_mdpi);
         }
-//        logCornerLatsAndLongs();
     }
 
     /**
@@ -290,11 +289,17 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                 try {
                     JSONObject responseObject = new JSONObject(response.body().string());
                     JSONArray jsonAirports = responseObject.getJSONArray("airportsin");
+                    JSONArray jsonDrones = responseObject.getJSONArray("dronessin");
                     airports = new ArrayList<Airport>();
                     for (int i = 0; i < jsonAirports.length(); i++) {
                         airports.add(new Airport(jsonAirports.getJSONObject(i)));
                     }
-                    drawAirports(airports);
+
+                    drones = new ArrayList<Drone>();
+                    for (int i = 0; i < jsonAirports.length(); i++) {
+                        drones.add(new Drone(jsonAirports.getJSONObject(i)));
+                    }
+                    drawDrones(drones);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -307,16 +312,16 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                for(Circle circle : circlesAdded) {
+                for (Circle circle : circlesAdded) {
                     circle.remove();
                 }
                 circlesAdded.clear();
 
                 int x = 0;
-                for(int y = 0; y < airports.size(); y ++) {
+                for (int y = 0; y < airports.size(); y++) {
                     Airport airport = airports.get(y);
-                    x ++;
-                    if(x > 100) {
+                    x++;
+                    if (x > 100) {
                         break;
                     }
                     int radius = 0;
@@ -337,6 +342,47 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                             .radius(radius) // this is in meters
                             .strokeColor(Color.BLUE)
                             .fillColor(0x730000ff)));
+                }
+            }
+        });
+
+    }
+
+    private void drawDrones(final ArrayList<Drone> drones) {
+
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                for(Circle circle : circlesAdded) {
+                    circle.remove();
+                }
+                circlesAdded.clear();
+
+                int x = 0;
+                for(int y = 0; y < drones.size(); y ++) {
+                    Drone drone = drones.get(y);
+                    x ++;
+                    if(x > 100) {
+                        break;
+                    }
+                    int radius = 0;
+                    switch (drone.sizeLevel) {
+                        case 0:
+                            radius = 5630;// 3.5 miles
+                            break;
+                        case 1:
+                            radius = 8046;// 6.5 miles
+                            break;
+                        case 2:
+                            radius = 11000;// 8.5 miles
+                            break;
+
+                    }
+                    circlesAdded.add(mMap.addCircle(new CircleOptions()
+                            .center(new LatLng(drone.lat, drone.lon))
+                            .radius(radius) // this is in meters
+                            .strokeColor(Color.GREEN)
+                            .fillColor(0x7300ff00)));
                 }
             }
         });
