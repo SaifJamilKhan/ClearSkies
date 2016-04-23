@@ -56,7 +56,7 @@ public class DroneDetailsAdapter extends RecyclerView.Adapter<DroneDetailsAdapte
 
         } else {
             SingleWeatherStat singleWeatherStat = singleWeatherStats.get(position - 1);
-            holder.statTitleTV.setText(singleWeatherStat.title);
+            holder.statTitleTV.setText(singleWeatherStat.title + ":");
             if (singleWeatherStat.title.equals("Wind Direction")) {
                 holder.statNumTV.setText(degToCardinal(singleWeatherStat.value));
             } else {
