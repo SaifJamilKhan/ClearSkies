@@ -48,6 +48,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     private Context context;
     private WeatherData weatherData;
     private ArrayList<Airport> airports;
+    private ArrayList<Drone> drones;
     private TextView flying_conditions, wind_speed_text, wind_direction_text, temperature_text, pressure_text, humidity_text;
     private ImageButton changingButton, openPanelButton;
 
@@ -64,6 +65,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     private Circle mCircle;
 
     private ArrayList<Circle> circlesAdded = new ArrayList<>() ;
+    private ArrayList<Circle> droneCirclesAdded = new ArrayList<>() ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -162,7 +164,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
             mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
             button.setImageResource(R.drawable.google_earth_mdpi);
         }
-//        logCornerLatsAndLongs();
     }
 
     /**
@@ -309,16 +310,19 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
-            @Override public void onFailure(Call call, IOException e) {
+            @Override
+            public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
             }
 
-            @Override public void onResponse(Call call, Response response) throws IOException {
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
                 if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
 
                 try {
                     JSONObject responseObject = new JSONObject(response.body().string());
                     JSONArray jsonAirports = responseObject.getJSONArray("airportsin");
+                    JSONArray jsonDrones = responseObject.getJSONArray("dronesin");
                     airports = new ArrayList<Airport>();
                     for (int i = 0; i < jsonAirports.length(); i++) {
                         if (jsonAirports.getJSONObject(i).has("lat") && jsonAirports.getJSONObject(i).has("lon")) {
@@ -326,6 +330,12 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                         }
                     }
                     drawAirports(airports);
+                    drones = new ArrayList<Drone>();
+                    for (int i = 0; i < jsonAirports.length(); i++) {
+                        drones.add(new Drone(jsonDrones.getJSONObject(i)));
+                    }
+                    Log.v("saif", "drones found " + drones.size());
+                    drawDrones(drones);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -338,16 +348,26 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                for(Circle circle : circlesAdded) {
-                    circle.remove();
-                }
-                circlesAdded.clear();
 
+                ArrayList<Airport> airportsToAdd = new ArrayList<>();
+                int b = 0;
+                while(airportsToAdd.size() < 100 && b < airports.size()) {
+                    airportsToAdd.add(airports.get(b));
+                    b++;
+                }
+                for(Circle circle : circlesAdded) {
+                    for(int x = 0; x < airportsToAdd.size(); x ++) {
+                        Airport airport = airportsToAdd.get(x);
+                        if(circle.getCenter().longitude == airport.lon && circle.getCenter().latitude == airport.lat) {
+                            airportsToAdd.remove(airport);
+                        }
+                    }
+                }
                 int x = 0;
-                for(int y = 0; y < airports.size(); y ++) {
-                    Airport airport = airports.get(y);
-                    x ++;
-                    if(x > 100) {
+                for (int y = 0; y < airportsToAdd.size(); y++) {
+                    Airport airport = airportsToAdd.get(y);
+                    x++;
+                    if (x > 20) {
                         break;
                     }
                     int radius = 0;
@@ -367,7 +387,55 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                             .center(new LatLng(airport.lat, airport.lon))
                             .radius(radius) // this is in meters
                             .strokeColor(Color.BLUE)
-                            .fillColor(0x730000ff)));
+                            .fillColor(0x732200ff)));
+                }
+            }
+        });
+
+    }
+
+    private void drawDrones(final ArrayList<Drone> drones) {
+
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                ArrayList<Drone> dronesToAdd = new ArrayList<Drone>();
+                int b = 0;
+                while(dronesToAdd.size() < 100 && b < drones.size()) {
+                    dronesToAdd.add(drones.get(b));
+                    b ++;
+                }
+
+                for(Circle circle : droneCirclesAdded) {
+                    for(int x = 0; x < dronesToAdd.size(); x ++) {
+                        Drone airport = dronesToAdd.get(x);
+                        if(circle.getCenter().longitude == airport.lon && circle.getCenter().latitude == airport.lat) {
+                            dronesToAdd.remove(airport);
+                        }
+                    }
+                }
+
+                for(int y = 0; y < dronesToAdd.size(); y ++) {
+                    Drone drone = dronesToAdd.get(y);
+                    int radius = 0;
+                    switch (drone.sizeLevel) {
+                        case 0:
+                            radius = 5630;// 3.5 miles
+                            break;
+                        case 1:
+                            radius = 8046;// 6.5 miles
+                            break;
+                        case 2:
+                            radius = 11000;// 8.5 miles
+                            break;
+
+                    }
+                    droneCirclesAdded.add(mMap.addCircle(new CircleOptions()
+                            .center(new LatLng(drone.lat, drone.lon))
+                            .radius(radius) // this is in meters
+                            .strokeColor(0x7322ff00)
+                            .fillColor(0x73227700)));
                 }
             }
         });
