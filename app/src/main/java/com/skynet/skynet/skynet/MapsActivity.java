@@ -2,26 +2,18 @@ package com.skynet.skynet.skynet;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.Point;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.v4.widget.SlidingPaneLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.Toast;
-import android.content.Intent;
-import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -30,12 +22,12 @@ import butterknife.OnClick;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,7 +35,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -57,9 +48,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     private Context context;
     private WeatherData weatherData;
     private ArrayList<Airport> airports;
-    private RecyclerView recyclerView;
-    private DroneDetailsAdapter adapter;
-    private ArrayList<SingleWeatherStat> singleWeatherStats;
+    private TextView flying_conditions, wind_speed_text, wind_direction_text, temperature_text, pressure_text, humidity_text;
+    private ImageButton changingButton, openPanelButton;
 
     @Bind(R.id.my_toolbar)
     public Toolbar myToolbar;
@@ -90,7 +80,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
 
         context = this;
 
-
         mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override
             public void onCameraChange(CameraPosition cameraPosition) {
@@ -115,13 +104,47 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
             }
         });
 
-        singleWeatherStats = new ArrayList<>();
-        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        adapter = new DroneDetailsAdapter(singleWeatherStats);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.setAdapter(adapter);
+        flying_conditions = (TextView) findViewById(R.id.flying_conditions);
+        wind_speed_text = (TextView) findViewById(R.id.wind_speed_text);
+        wind_direction_text = (TextView) findViewById(R.id.wind_direction_text);
+        temperature_text = (TextView) findViewById(R.id.temperature_text);
+        pressure_text = (TextView) findViewById(R.id.pressure_text);
+        humidity_text = (TextView) findViewById(R.id.humidity_text);
+        changingButton = (ImageButton) findViewById(R.id.changingButton);
+        openPanelButton = (ImageButton) findViewById(R.id.openPanelButton);
+        final SlidingUpPanelLayout panel = (SlidingUpPanelLayout) findViewById(R.id.bottomsheet);
+
+        changingButton.setVisibility(View.INVISIBLE);
+        openPanelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                panel.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+            }
+        });
+
+        panel.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+            @Override
+            public void onPanelSlide(View panel, float slideOffset) {
+
+            }
+
+            @Override
+            public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
+                if (newState == SlidingUpPanelLayout.PanelState.EXPANDED) {
+                    changingButton.setVisibility(View.VISIBLE);
+                } else {
+                    changingButton.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+
+        Typeface typeFace=Typeface.createFromAsset(getAssets(),"fonts/Roboto-Regular.ttf");
+        flying_conditions.setTypeface(typeFace);
+        wind_speed_text.setTypeface(typeFace);
+        wind_direction_text.setTypeface(typeFace);
+        temperature_text.setTypeface(typeFace);
+        pressure_text.setTypeface(typeFace);
+        humidity_text.setTypeface(typeFace);
     }
 
     @Override
@@ -246,7 +269,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
 
     private String getWeatherURL(double lat, double lon) {
         return "http://api.openweathermap.org/data/2.5/weather?lat=" + Double.toString(lat) + "&lon="
-                + Double.toString(lon) + "&APPID=7a8668b5c3f71c0608b503bdd446c3c1";
+                + Double.toString(lon) + "&units=metric&APPID=7a8668b5c3f71c0608b503bdd446c3c1";
     }
 
     private final OkHttpClient client = new OkHttpClient();
@@ -351,16 +374,15 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     }
 
     private void fillBottomSheet() {
-        singleWeatherStats.clear();
-        singleWeatherStats.add(new SingleWeatherStat("Temperature", weatherData.temp));
-        singleWeatherStats.add(new SingleWeatherStat("Pressure", weatherData.pressure));
-        singleWeatherStats.add(new SingleWeatherStat("Humidity", weatherData.humidity));
-        singleWeatherStats.add(new SingleWeatherStat("Wind Speed", weatherData.windSpeed));
-        singleWeatherStats.add(new SingleWeatherStat("Wind Direction", weatherData.windDirection));
         MapsActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                adapter.notifyDataSetChanged();
+                flying_conditions.setText("Safe flying conditions");
+                wind_speed_text.setText("Wind speed: " + Double.toString(weatherData.windSpeed) + " km/h");
+                wind_direction_text.setText("Wind direction: " + weatherData.windDirectionCardinal);
+                temperature_text.setText("Temperature: " + Integer.toString((int) Math.round(weatherData.temp)) + "°C");
+                pressure_text.setText("Pressure: " + Integer.toString((int) Math.round(weatherData.pressure)) + " hpa");
+                humidity_text.setText("Humidity: " + Double.toString(weatherData.humidity) + "%");
             }
         });
     }
