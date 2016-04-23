@@ -27,11 +27,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -77,11 +76,30 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
 
         context = this;
 
-        try {
-            callCustomAPI(getCustomURL());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
+        mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
+            @Override
+            public void onCameraChange(CameraPosition cameraPosition) {
+                try {
+                    LatLng botleft = mMap.getProjection()
+                            .getVisibleRegion().nearLeft;
+
+                    LatLng botright = mMap.getProjection()
+                            .getVisibleRegion().nearRight;
+
+                    LatLng topleft = mMap.getProjection()
+                            .getVisibleRegion().farLeft;
+
+                    LatLng topright = mMap.getProjection()
+                            .getVisibleRegion().farRight;
+
+                    Log.v("saif", "camera change event called");
+                    callCustomAPI(getCustomURL(botleft, botright, topleft, topright));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     @OnClick(R.id.detailsButton)
@@ -108,7 +126,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         } else {
             mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         }
-        logCornerLatsAndLongs();
+//        logCornerLatsAndLongs();
     }
 
     /**
@@ -153,7 +171,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         LatLng topright = mMap.getProjection()
                 .getVisibleRegion().farRight;
 
-        Log.v("saif", " " + botleft + " " + botright + " " + topleft + " " + topright + " ");
     }
 
     /**
@@ -167,8 +184,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
 
     private void createCircleAroundPoint(LatLng latlng) {
         if(mCircle == null) {
-            Color color = new Color();
-
             mCircle = mMap.addCircle(new CircleOptions()
                     .center(latlng)
                     .radius(10000) // this is in meters
@@ -246,11 +261,11 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         });
     }
 
-    private String getCustomURL() {
-//        return "https://skynet-server.herokuapp.com/airportsin?lat1=" + lat1 + "&lon1=" + lon1
-//                + "&lat2=" + lat2 + "&lon2=" + lon2 + "&lat3=" + lat3 + "&lon3=" + lon3 + "&lat4="
-//                + lat4 + "&lon4=" + lon4;
-        return "https://skynet-server.herokuapp.com/airportsin?lat1=43.57844659660155&lon1=-79.52642306685448&lat2=43.57844659660155&lon2=-79.24182560294867&lat3=43.897733906604834&lon3=-79.24182560294867&lat4=43.897733906604834&lon4=-79.52642306685448";
+    private String getCustomURL(LatLng botLeft, LatLng botRight, LatLng topLeft, LatLng topRight) {
+        return "https://skynet-server.herokuapp.com/airportsin?lat1=" + botLeft.latitude + "&lon1=" + botLeft.longitude
+                + "&lat2=" + botRight.latitude + "&lon2=" + botRight.longitude + "&lat3=" + topLeft.latitude + "&lon3=" + topLeft.longitude + "&lat4="
+                + topRight.latitude + "&lon4=" + topRight.longitude;
+//        return "https://skynet-server.herokuapp.com/airportsin?lat1=43.57844659660155&lon1=-79.52642306685448&lat2=43.57844659660155&lon2=-79.24182560294867&lat3=43.897733906604834&lon3=-79.24182560294867&lat4=43.897733906604834&lon4=-79.52642306685448";
     }
 
     private void callCustomAPI(String url) throws Exception {
@@ -272,12 +287,29 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                     airports = new ArrayList<Airport>();
                     for (int i = 0; i < jsonAirports.length(); i++) {
                         airports.add(new Airport(jsonAirports.getJSONObject(i)));
+
                     }
+                    drawAirports(airports);
+                    Log.v("saif", "airports  found " + airports.size());
                     System.out.println(airports.size());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
         });
+    }
+
+    private void drawAirports(ArrayList<Airport> airports) {
+
+        for(Airport airport: airports) {
+
+            mCircle = mMap.addCircle(new CircleOptions()
+                    .center(new LatLng(airport.lat, airport.lon))
+                    .radius(1000) // this is in meters
+                    .strokeColor(Color.BLUE)
+                    .fillColor(0x730000ff));
+
+        }
+
     }
 }
