@@ -8,8 +8,12 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.widget.Button;
 import android.widget.Toast;
 import android.content.Intent;
@@ -38,6 +42,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -51,6 +56,9 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     private Context context;
     private WeatherData weatherData;
     private ArrayList<Airport> airports;
+    private RecyclerView recyclerView;
+    private DroneDetailsAdapter adapter;
+    private ArrayList<SingleWeatherStat> singleWeatherStats;
 
     @Bind(R.id.my_toolbar)
     public Toolbar myToolbar;
@@ -101,17 +109,14 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                 }
             }
         });
-    }
 
-    @OnClick(R.id.detailsButton)
-    public void detailsButtonPressed() {
-        if(weatherData != null) {
-            Intent intent = new Intent(context, DroneDetailsActivity.class);
-            intent.putExtra("weatherData", weatherData);
-            startActivity(intent);
-        } else {
-            Toast.makeText(this, "Location and weather not yet available", Toast.LENGTH_SHORT).show();;
-        }
+        singleWeatherStats = new ArrayList<>();
+        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        adapter = new DroneDetailsAdapter(singleWeatherStats);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setAdapter(adapter);
     }
 
     @Override
@@ -254,6 +259,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
 
                 try {
                     weatherData = new WeatherData(new JSONObject(response.body().string()));
+                    fillBottomSheet();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -287,8 +293,9 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                     JSONArray jsonAirports = responseObject.getJSONArray("airportsin");
                     airports = new ArrayList<Airport>();
                     for (int i = 0; i < jsonAirports.length(); i++) {
-                        airports.add(new Airport(jsonAirports.getJSONObject(i)));
-
+                        if (jsonAirports.getJSONObject(i).has("lat") && jsonAirports.getJSONObject(i).has("lon")) {
+                            airports.add(new Airport(jsonAirports.getJSONObject(i)));
+                        }
                     }
                     drawAirports(airports);
                 } catch (JSONException e) {
@@ -319,6 +326,20 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                 }
             }
         });
+    }
 
+    private void fillBottomSheet() {
+        singleWeatherStats.clear();
+        singleWeatherStats.add(new SingleWeatherStat("Temperature", weatherData.temp));
+        singleWeatherStats.add(new SingleWeatherStat("Pressure", weatherData.pressure));
+        singleWeatherStats.add(new SingleWeatherStat("Humidity", weatherData.humidity));
+        singleWeatherStats.add(new SingleWeatherStat("Wind Speed", weatherData.windSpeed));
+        singleWeatherStats.add(new SingleWeatherStat("Wind Direction", weatherData.windDirection));
+        MapsActivity.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                adapter.notifyDataSetChanged();
+            }
+        });
     }
 }
