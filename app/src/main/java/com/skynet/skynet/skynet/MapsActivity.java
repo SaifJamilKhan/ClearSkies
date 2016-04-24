@@ -68,8 +68,10 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     private WeatherData weatherData;
     private ArrayList<Airport> airports;
     private ArrayList<Drone> drones;
+    private ArrayList<MapAirplane> mapAirPlanes;
     private ArrayList<Airport> originalAirports;
     private ArrayList<Drone> originalDrones;
+    private ArrayList<MapAirplane> originalMapAirPlanes;
     private TextView flying_conditions, wind_speed_text, wind_direction_text, temperature_text, pressure_text, humidity_text, visibility_text, precip_probability_text;
     private TextView warnings_title, safety_reasons;
     private ImageButton changingButton, openPanelButton;
@@ -100,7 +102,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     private int temp;
     private int pressure;
     private double humidity;
-    private ArrayList<MapAirplane> mapAirPlanes;
     private double visibility;
     private double precipProbability;
 
@@ -607,6 +608,10 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                         mapAirPlanes.add(new MapAirplane(jsonFlights.getJSONObject(i)));
                     }
 
+                    if (originalUpdates) {
+                        originalMapAirPlanes = mapAirPlanes;
+                    }
+
                     drawAirports(airports);
                     drawDrones(drones);
                     drawAirplanes(mapAirPlanes);
@@ -791,6 +796,18 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                     }
                     unsafeReasons += "- You are too close to another drone operator\n";
                     break;
+                }
+            }
+        }
+
+        if ((originalMapAirPlanes != null) && (mLatestLocationLatLng != null)) {
+            for (MapAirplane airplane : originalMapAirPlanes) {
+                double distBetween = DistanceCalculator.distance(mLatestLocationLatLng.latitude, mLatestLocationLatLng.longitude, airplane.lat, airplane.lon, "k");
+                if ((distBetween * 1000.0) <= (4000 + airplane.radius)) {
+                    if (!status.equals("unsafe")) {
+                        status = "warning";
+                    }
+                    unsafeReasons += "- An airplane is flying overhead\n";
                 }
             }
         }

@@ -17,6 +17,8 @@ public class MapAirplane {
     public int altitude;
     public double timestamp;
 
+    public int radius = 2000; // Arbitrary
+
 
     public MapAirplane(JSONObject jsonObject) {
         try {
