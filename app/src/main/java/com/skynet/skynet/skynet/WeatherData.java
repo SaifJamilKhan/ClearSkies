@@ -19,17 +19,21 @@ public class WeatherData implements Serializable {
     public double windSpeed;
     public double windDirectionDegree;
     public String windDirectionCardinal;
+    public double visibility;
+    public double precipProbability;
 
     public WeatherData(JSONObject jsonObject) {
         try {
-            this.lat = jsonObject.getJSONObject("coord").getDouble("lat");
-            this.lon = jsonObject.getJSONObject("coord").getDouble("lon");
-            this.temp = jsonObject.getJSONObject("main").getDouble("temp");
-            this.pressure = jsonObject.getJSONObject("main").getDouble("pressure");
-            this.humidity = jsonObject.getJSONObject("main").getDouble("humidity");
-            this.windSpeed = jsonObject.getJSONObject("wind").getDouble("speed");
-            this.windDirectionDegree = jsonObject.getJSONObject("wind").getDouble("deg");
+            this.lat = jsonObject.getDouble("latitude");
+            this.lon = jsonObject.getDouble("longitude");
+            this.temp = jsonObject.getJSONObject("currently").getDouble("temperature");
+            this.pressure = jsonObject.getJSONObject("currently").getDouble("pressure");
+            this.humidity = jsonObject.getJSONObject("currently").getDouble("humidity");
+            this.windSpeed = jsonObject.getJSONObject("currently").getDouble("windSpeed");
+            this.windDirectionDegree = jsonObject.getJSONObject("currently").getDouble("windBearing");
             this.windDirectionCardinal = degToCardinal(this.windDirectionDegree);
+            this.visibility = jsonObject.getJSONObject("currently").getDouble("visibility");
+            this.precipProbability = jsonObject.getJSONObject("currently").getDouble("precipProbability");
         } catch (JSONException e) {
             e.printStackTrace();
         }

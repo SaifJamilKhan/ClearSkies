@@ -269,6 +269,54 @@
 
                     </LinearLayout>
 
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingTop="14dp"
+                        android:paddingBottom="14dp" >
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/icon_visibility"
+                            android:layout_gravity="center_vertical" />
+
+                        <TextView
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/visibility_text"
+                            android:text="Visibility: "
+                            android:textSize="18sp"
+                            android:layout_marginLeft="24dp"
+                            android:layout_gravity="center_vertical" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingTop="14dp"
+                        android:paddingBottom="14dp" >
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/icon_precipitation"
+                            android:layout_gravity="center_vertical" />
+
+                        <TextView
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/precip_probability_text"
+                            android:text="Precipitation probability: "
+                            android:textSize="18sp"
+                            android:layout_marginLeft="24dp"
+                            android:layout_gravity="center_vertical" />
+
+                    </LinearLayout>
+
                 </LinearLayout>
 
             </LinearLayout>

@@ -69,7 +69,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     private WeatherData weatherData;
     private ArrayList<Airport> airports;
     private ArrayList<Drone> drones;
-    private TextView flying_conditions, wind_speed_text, wind_direction_text, temperature_text, pressure_text, humidity_text;
+    private TextView flying_conditions, wind_speed_text, wind_direction_text, temperature_text, pressure_text, humidity_text, visibility_text, precip_probability_text;
     private TextView warnings_title, safety_reasons;
     private ImageButton changingButton, openPanelButton;
     private ImageView simpleConditionImage;
@@ -98,6 +98,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     private int temp;
     private int pressure;
     private double humidity;
+    private double visibility;
+    private double precipProbability;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -215,6 +217,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         temperature_text = (TextView) findViewById(R.id.temperature_text);
         pressure_text = (TextView) findViewById(R.id.pressure_text);
         humidity_text = (TextView) findViewById(R.id.humidity_text);
+        visibility_text = (TextView) findViewById(R.id.visibility_text);
+        precip_probability_text = (TextView) findViewById(R.id.precip_probability_text);
         warnings_title = (TextView) findViewById(R.id.warnings_title);
         safety_reasons = (TextView) findViewById(R.id.safety_reasons);
         simpleConditionImage = (ImageView) findViewById(R.id.simple_condition);
@@ -259,6 +263,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         temperature_text.setTypeface(typeFace);
         pressure_text.setTypeface(typeFace);
         humidity_text.setTypeface(typeFace);
+        visibility_text.setTypeface(typeFace);
+        precip_probability_text.setTypeface(typeFace);
     }
 
 //    @Override
@@ -477,8 +483,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
 //    }
 
     private String getWeatherURL(double lat, double lon) {
-        return "http://api.openweathermap.org/data/2.5/weather?lat=" + Double.toString(lat) + "&lon="
-                + Double.toString(lon) + "&units=metric&APPID=7a8668b5c3f71c0608b503bdd446c3c1";
+        return "https://api.forecast.io/forecast/cae4acdc3bd25fa37b9cbea40afbab7e/"
+                + Double.toString(lat) + "," + Double.toString(lon) + "?units=si";
     }
 
     private final OkHttpClient client = new OkHttpClient();
@@ -636,6 +642,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         pressure = 0;
         humidity = 0.0;
         windDirection = "";
+        visibility = 0.0;
+        precipProbability = 0.0;
 
         if (weatherData != null) {
             windSpeed = weatherData.windSpeed;
@@ -643,6 +651,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
             temp = (int) Math.round(weatherData.temp);
             pressure = (int) Math.round(weatherData.pressure);
             humidity = weatherData.humidity;
+            visibility = weatherData.visibility;
+            precipProbability = weatherData.precipProbability;
 
             // Wind speed no more than 20
             // Can't handle precipitation
@@ -713,11 +723,13 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                     warnings_title.setVisibility(View.VISIBLE);
                 }
 
-                wind_speed_text.setText("Wind speed: " + Double.toString(windSpeed) + " km/h");
+                wind_speed_text.setText("Wind speed: " + Double.toString(windSpeed) + " m/s");
                 wind_direction_text.setText("Wind direction: " + windDirection);
                 temperature_text.setText("Temperature: " + Integer.toString(temp) + "°C");
                 pressure_text.setText("Pressure: " + Integer.toString(pressure) + " hpa");
                 humidity_text.setText("Humidity: " + Double.toString(humidity) + "%");
+                visibility_text.setText("Visibility: " + Double.toString(visibility) + " km");
+                precip_probability_text.setText("Precipitation probability: " + Double.toString(precipProbability) + "%");
                 safety_reasons.setText(unsafeReasons);
             }
         });
