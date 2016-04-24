@@ -17,7 +17,8 @@ public class WeatherData implements Serializable {
     public double pressure;
     public double humidity;
     public double windSpeed;
-    public double windDirection;
+    public double windDirectionDegree;
+    public String windDirectionCardinal;
 
     public WeatherData(JSONObject jsonObject) {
         try {
@@ -27,9 +28,15 @@ public class WeatherData implements Serializable {
             this.pressure = jsonObject.getJSONObject("main").getDouble("pressure");
             this.humidity = jsonObject.getJSONObject("main").getDouble("humidity");
             this.windSpeed = jsonObject.getJSONObject("wind").getDouble("speed");
-            this.windDirection = jsonObject.getJSONObject("wind").getDouble("deg");
+            this.windDirectionDegree = jsonObject.getJSONObject("wind").getDouble("deg");
+            this.windDirectionCardinal = degToCardinal(this.windDirectionDegree);
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    private String degToCardinal(double x) {
+        String directions[] = {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
+        return directions[ (int)Math.round(( (x % 360) / 45)) % 8 ];
     }
 }
