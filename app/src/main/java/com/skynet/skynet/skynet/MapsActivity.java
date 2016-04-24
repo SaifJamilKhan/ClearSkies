@@ -432,8 +432,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
             mCircle = mMap.addCircle(new CircleOptions()
                     .center(latlng)
                     .radius(3000) // this is in meters
-                    .strokeColor(Color.RED)
-                    .fillColor(0x73DB5E5E));
+                    .strokeWidth(0)
+                    .fillColor(0x8038a4dc));
 
     }
 
@@ -583,8 +583,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                     circlesAdded.add(mMap.addCircle(new CircleOptions()
                             .center(new LatLng(airport.lat, airport.lon))
                             .radius(airport.radius) // this is in meters
-                            .strokeColor(Color.BLUE)
-                            .fillColor(0x732200ff)));
+                            .strokeWidth(0)
+                            .fillColor(0x80f37c20)));
                 }
             }
         });
@@ -620,8 +620,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                     droneCirclesAdded.add(mMap.addCircle(new CircleOptions()
                             .center(new LatLng(drone.lat, drone.lon))
                             .radius(drone.radius) // this is in meters
-                            .strokeColor(0x7322ff00)
-                            .fillColor(0x73227700)));
+                            .strokeWidth(0)
+                            .fillColor(0x80db3126)));
                 }
             }
         });
@@ -678,7 +678,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         }
 
         if ((drones != null) && (mLatestLocationLatLng != null)) {
-            for (Drone drone : drones) {
+            for (int i = 0; i < drones.size(); i++) {
+                Drone drone = drones.get(i);
                 double distBetween = DistanceCalculator.distance(mLatestLocationLatLng.latitude, mLatestLocationLatLng.longitude, drone.lat, drone.lon, "k");
                 if (distBetween <= (4000 + drone.radius)) {
                     if (!status.equals("unsafe")) {
