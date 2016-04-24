@@ -11,14 +11,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.widget.SlidingPaneLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.view.menu.MenuBuilder;
-import android.support.v7.view.menu.MenuPresenter;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.PopupMenu;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
@@ -30,6 +23,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.ImageView;
 import android.widget.Toast;
 import android.content.Intent;
 import android.os.Bundle;
@@ -76,7 +70,9 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     private ArrayList<Airport> airports;
     private ArrayList<Drone> drones;
     private TextView flying_conditions, wind_speed_text, wind_direction_text, temperature_text, pressure_text, humidity_text;
+    private TextView warnings_title, safety_reasons;
     private ImageButton changingButton, openPanelButton;
+    private ImageView simpleConditionImage;
 
     @Bind(R.id.my_toolbar)
     public Toolbar myToolbar;
@@ -94,6 +90,14 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     private ArrayList<Circle> droneCirclesAdded = new ArrayList<>() ;
     private LatLng mLatestLocationLatLng;
     private PopupWindow changeStatusPopUp;
+
+    private String status;
+    private String unsafeReasons;
+    private double windSpeed;
+    private String windDirection;
+    private int temp;
+    private int pressure;
+    private double humidity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -211,6 +215,9 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         temperature_text = (TextView) findViewById(R.id.temperature_text);
         pressure_text = (TextView) findViewById(R.id.pressure_text);
         humidity_text = (TextView) findViewById(R.id.humidity_text);
+        warnings_title = (TextView) findViewById(R.id.warnings_title);
+        safety_reasons = (TextView) findViewById(R.id.safety_reasons);
+        simpleConditionImage = (ImageView) findViewById(R.id.simple_condition);
         changingButton = (ImageButton) findViewById(R.id.changingButton);
         openPanelButton = (ImageButton) findViewById(R.id.openPanelButton);
         final SlidingUpPanelLayout panel = (SlidingUpPanelLayout) findViewById(R.id.bottomsheet);
@@ -536,6 +543,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                         drones.add(new Drone(jsonDrones.getJSONObject(i)));
                     }
                     drawDrones(drones);
+                    fillBottomSheet();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -608,22 +616,10 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
 
                 for(int y = 0; y < dronesToAdd.size(); y ++) {
                     Drone drone = dronesToAdd.get(y);
-                    int radius = 0;
-                    switch (drone.sizeLevel) {
-                        case 0:
-                            radius = 5630;// 3.5 miles
-                            break;
-                        case 1:
-                            radius = 8046;// 6.5 miles
-                            break;
-                        case 2:
-                            radius = 11000;// 8.5 miles
-                            break;
 
-                    }
                     droneCirclesAdded.add(mMap.addCircle(new CircleOptions()
                             .center(new LatLng(drone.lat, drone.lon))
-                            .radius(radius) // this is in meters
+                            .radius(drone.radius) // this is in meters
                             .strokeColor(0x7322ff00)
                             .fillColor(0x73227700)));
                 }
@@ -632,20 +628,63 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     }
 
     private void fillBottomSheet() {
-        String status = "safe";
-        String unsafeReasons = "";
+        status = "safe";
+        unsafeReasons = "";
 
-        final double windSpeed = weatherData.windSpeed;
-        final int temp = (int) Math.round(weatherData.temp);
-        final int pressure = (int) Math.round(weatherData.pressure);
-        final double humidity = weatherData.humidity;
+        windSpeed = 0.0;
+        temp = 0;
+        pressure = 0;
+        humidity = 0.0;
+        windDirection = "";
 
-        if (airports != null) {
+        if (weatherData != null) {
+            windSpeed = weatherData.windSpeed;
+            windDirection = weatherData.windDirectionCardinal;
+            temp = (int) Math.round(weatherData.temp);
+            pressure = (int) Math.round(weatherData.pressure);
+            humidity = weatherData.humidity;
+
+            // Wind speed no more than 20
+            // Can't handle precipitation
+            // Can't handle temperature less than 0 or above 50
+            // Can't handle humidity above 90%
+
+            if (windSpeed >= 20) {
+                status = "unsafe";
+                unsafeReasons += "- Wind speeds are too high\n";
+            }
+            if (temp >= 50) {
+                status = "unsafe";
+                unsafeReasons += "- The temperature is too high\n";
+            } else if (temp <= 0) {
+                status = "unsafe";
+                unsafeReasons += "- The temperature is too low\n";
+            }
+            if (humidity >= 90) {
+                status = "unsafe";
+                unsafeReasons += "- The humidity is too high\n";
+            }
+        }
+
+        if ((airports != null) && (mLatestLocationLatLng != null)) {
             for (Airport airport : airports) {
-                double distBetween = DistanceCalculator.distance(0.0, 0.0, airport.lat, airport.lon, "k");
+                double distBetween = DistanceCalculator.distance(mLatestLocationLatLng.latitude, mLatestLocationLatLng.longitude, airport.lat, airport.lon, "k");
                 if (distBetween <= (4000 + airport.radius)) {
                     status = "unsafe";
-                    unsafeReasons += "- You are too close to an airport";
+                    unsafeReasons += "- You are too close to an airport\n";
+                    break;
+                }
+            }
+        }
+
+        if ((drones != null) && (mLatestLocationLatLng != null)) {
+            for (Drone drone : drones) {
+                double distBetween = DistanceCalculator.distance(mLatestLocationLatLng.latitude, mLatestLocationLatLng.longitude, drone.lat, drone.lon, "k");
+                if (distBetween <= (4000 + drone.radius)) {
+                    if (!status.equals("unsafe")) {
+                        status = "warning";
+                    }
+                    unsafeReasons += "- You are too close to another drone operator\n";
                     break;
                 }
             }
@@ -654,12 +693,32 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         MapsActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                flying_conditions.setText("Safe flying conditions");
+                if (status.equals("safe")) {
+                    flying_conditions.setText("Safe flying conditions");
+                    changingButton.setImageResource(R.drawable.icon_green_drone);
+                    openPanelButton.setImageResource(R.drawable.icon_green_drone);
+                    simpleConditionImage.setImageResource(R.drawable.icon_checkmark);
+                    warnings_title.setVisibility(View.INVISIBLE);
+                } else if (status.equals("warning")) {
+                    flying_conditions.setText("Non-ideal flying conditions");
+                    changingButton.setImageResource(R.drawable.icon_yellow_drone);
+                    openPanelButton.setImageResource(R.drawable.icon_yellow_drone);
+                    simpleConditionImage.setImageResource(R.drawable.icon_slightly_risky);
+                    warnings_title.setVisibility(View.VISIBLE);
+                } else {
+                    flying_conditions.setText("Dangerous flying conditions");
+                    changingButton.setImageResource(R.drawable.icon_red_drone);
+                    openPanelButton.setImageResource(R.drawable.icon_red_drone);
+                    simpleConditionImage.setImageResource(R.drawable.icon_risky);
+                    warnings_title.setVisibility(View.VISIBLE);
+                }
+
                 wind_speed_text.setText("Wind speed: " + Double.toString(windSpeed) + " km/h");
-                wind_direction_text.setText("Wind direction: " + weatherData.windDirectionCardinal);
+                wind_direction_text.setText("Wind direction: " + windDirection);
                 temperature_text.setText("Temperature: " + Integer.toString(temp) + "°C");
                 pressure_text.setText("Pressure: " + Integer.toString(pressure) + " hpa");
                 humidity_text.setText("Humidity: " + Double.toString(humidity) + "%");
+                safety_reasons.setText(unsafeReasons);
             }
         });
     }
