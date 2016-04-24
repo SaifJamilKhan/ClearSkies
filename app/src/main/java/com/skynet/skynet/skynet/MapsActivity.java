@@ -184,6 +184,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override
             public void onCameraChange(CameraPosition cameraPosition) {
+                if(!showDroneCircles && ! showAirportCircles) return;
                 try {
                     LatLng botleft = mMap.getProjection()
                             .getVisibleRegion().nearLeft;
@@ -419,13 +420,14 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     }
 
     private void createCircleAroundPoint(LatLng latlng) {
-        if(mCircle == null) {
+        if(!showSelfCircle) return;
+
             mCircle = mMap.addCircle(new CircleOptions()
                     .center(latlng)
                     .radius(3000) // this is in meters
                     .strokeColor(Color.RED)
                     .fillColor(0x73DB5E5E));
-        }
+
     }
 
     @Override
@@ -543,6 +545,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
 
     private void drawAirports(final ArrayList<Airport> airports) {
 
+        if(!showAirportCircles) return;
         this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -582,7 +585,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
 
     private void drawDrones(final ArrayList<Drone> drones) {
 
-        if(!showDroneCircles)
+        if(!showDroneCircles) return;
         this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
