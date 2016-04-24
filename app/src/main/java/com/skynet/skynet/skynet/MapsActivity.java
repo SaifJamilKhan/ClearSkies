@@ -111,7 +111,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         ButterKnife.bind(this);
         setUpMapIfNeeded();
         mMap.setMyLocationEnabled(true);
-        myToolbar.setTitle("Hermes");
+        myToolbar.setTitle("ClearSkies");
 
         myToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
@@ -208,9 +208,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override
             public void onCameraChange(CameraPosition cameraPosition) {
-                Log.v("saif", "got here");
                 if(!showDroneCircles && ! showAirportCircles) return;
-                Log.v("saif", "my team good");
                 try {
                     LatLng botleft = mMap.getProjection()
                             .getVisibleRegion().nearLeft;
@@ -590,7 +588,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                         }
                     }
 
-                    if ((originalAirports == null) && originalUpdates) {
+                    if (originalUpdates) {
                         System.out.println("OG");
                         originalAirports = airports;
                     }
@@ -600,7 +598,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                         drones.add(new Drone(jsonDrones.getJSONObject(i)));
                     }
 
-                    if ((originalDrones == null) && originalUpdates) {
+                    if (originalUpdates) {
                         originalDrones = drones;
                     }
 
