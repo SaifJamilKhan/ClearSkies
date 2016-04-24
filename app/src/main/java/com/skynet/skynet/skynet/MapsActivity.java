@@ -431,7 +431,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
 
             mCircle = mMap.addCircle(new CircleOptions()
                     .center(latlng)
-                    .radius(3000) // this is in meters
+                    .radius(4000) // this is in meters
                     .strokeWidth(0)
                     .fillColor(0x8038a4dc));
 
