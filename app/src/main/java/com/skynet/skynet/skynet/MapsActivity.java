@@ -128,20 +128,28 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
             @Override
             public void onClick(View v) {
 
-                PopupMenu popup = new PopupMenu(MapsActivity.this, v);
+                SkynetPopupMenu popup = new SkynetPopupMenu(MapsActivity.this, v);
                 //Inflating the Popup using xml file
                 popup.getMenuInflater()
                         .inflate(R.menu.main_menu, popup.getMenu());
 
                 //registering popup with OnMenuItemClickListener
-                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                popup.setOnMenuItemClickListener(new SkynetPopupMenu.OnMenuItemClickListener() {
                     public boolean onMenuItemClick(MenuItem item) {
-                        Toast.makeText(
-                                MapsActivity.this,
-                                "You Clicked : " + item.getTitle(),
-                                Toast.LENGTH_SHORT
-                        ).show();
-                        Log.v("saif", "camera change event called");
+                        switch (item.getItemId()) {
+                            case R.id.action_toggle_self_circle:
+                                showSelfCircle = !showSelfCircle;
+                                drawSelfCircle(showSelfCircle);
+                                return true;
+                            case R.id.action_toggle_airports:
+                                showAirportCircles = !showAirportCircles;
+                                drawAirportCircles(showAirportCircles);
+                                return true;
+                            case R.id.action_toggle_drones:
+                                showDroneCircles = !showDroneCircles;
+                                drawDroneCircles(showDroneCircles);
+                                return true;
+                        }
                         return true;
                     }
                 });
