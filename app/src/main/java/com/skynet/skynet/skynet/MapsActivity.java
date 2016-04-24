@@ -1,11 +1,15 @@
 package com.skynet.skynet.skynet;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.widget.SlidingPaneLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -17,12 +21,15 @@ import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.Toast;
 import android.content.Intent;
 import android.os.Bundle;
@@ -53,6 +60,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -85,6 +93,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     private ArrayList<Circle> circlesAdded = new ArrayList<>() ;
     private ArrayList<Circle> droneCirclesAdded = new ArrayList<>() ;
     private LatLng mLatestLocationLatLng;
+    private PopupWindow changeStatusPopUp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,40 +133,48 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
 
         setSupportActionBar(myToolbar);
 
-        myToolbar.findViewById(R.id.filter_menu_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                SkynetPopupMenu popup = new SkynetPopupMenu(MapsActivity.this, v);
-                //Inflating the Popup using xml file
-                popup.getMenuInflater()
-                        .inflate(R.menu.main_menu, popup.getMenu());
-
-                //registering popup with OnMenuItemClickListener
-                popup.setOnMenuItemClickListener(new SkynetPopupMenu.OnMenuItemClickListener() {
-                    public boolean onMenuItemClick(MenuItem item) {
-                        switch (item.getItemId()) {
-                            case R.id.action_toggle_self_circle:
-                                showSelfCircle = !showSelfCircle;
-                                drawSelfCircle(showSelfCircle);
-                                return true;
-                            case R.id.action_toggle_airports:
-                                showAirportCircles = !showAirportCircles;
-                                drawAirportCircles(showAirportCircles);
-                                return true;
-                            case R.id.action_toggle_drones:
-                                showDroneCircles = !showDroneCircles;
-                                drawDroneCircles(showDroneCircles);
-                                return true;
-                        }
-                        return true;
-                    }
-                });
-
-                popup.show(); //showing popup menu
-                Log.v("saif", "on menu clicked ");
-            }
-        });
+//        myToolbar.findViewById(R.id.filter_menu_button).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//
+////                int[] location = new int[2];
+////                v.getLocationOnScreen(location);
+//                //Initialize the Point with x, and y positions
+////                Point point = new Point();
+////                point.x = 0;
+////                point.y = 300;
+////                showStatusPopup(MapsActivity.this, point);
+//
+//                SkynetPopupMenu popup = new SkynetPopupMenu(MapsActivity.this, v);
+//                //Inflating the Popup using xml file
+//                popup.getMenuInflater()
+//                        .inflate(R.menu.main_menu, popup.getMenu());
+//
+//                //registering popup with OnMenuItemClickListener
+//                popup.setOnMenuItemClickListener(new SkynetPopupMenu.OnMenuItemClickListener() {
+//                    public boolean onMenuItemClick(MenuItem item) {
+//                        switch (item.getItemId()) {
+//                            case R.id.action_toggle_self_circle:
+//                                showSelfCircle = !showSelfCircle;
+//                                drawSelfCircle(showSelfCircle);
+//                                return true;
+//                            case R.id.action_toggle_airports:
+//                                showAirportCircles = !showAirportCircles;
+//                                drawAirportCircles(showAirportCircles);
+//                                return true;
+//                            case R.id.action_toggle_drones:
+//                                showDroneCircles = !showDroneCircles;
+//                                drawDroneCircles(showDroneCircles);
+//                                return true;
+//                        }
+//                        return true;
+//                    }
+//                });
+//
+//                popup.show(); //showing popup menu
+//                Log.v("saif", "on menu clicked ");
+//            }
+//        });
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME, MIN_DISTANCE, this); //You can also use LocationManager.GPS_PROVIDER and LocationManager.PASSIVE_PROVIDER
@@ -221,6 +238,12 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
             }
         });
 
+
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().setNavigationBarColor(getResources().getColor(R.color.nav_bar_color));
+            getWindow().setStatusBarColor(getResources().getColor(R.color.stat_bar_color));
+        }
+
         Typeface typeFace=Typeface.createFromAsset(getAssets(),"fonts/Roboto-Regular.ttf");
         flying_conditions.setTypeface(typeFace);
         wind_speed_text.setTypeface(typeFace);
@@ -241,6 +264,30 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     boolean showDroneCircles = true;
     boolean showAirportCircles = true;
 
+    // The method that displays the popup.
+    private void showStatusPopup(final Activity context, Point p) {
+
+        // Inflate the popup_layout.xml
+        LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View layout = layoutInflater.inflate(R.layout.popover_view, null);
+
+        // Creating the PopupWindow
+        changeStatusPopUp = new PopupWindow(context);
+        changeStatusPopUp.setContentView(layout);
+        changeStatusPopUp.setWidth(LinearLayout.LayoutParams.WRAP_CONTENT);
+        changeStatusPopUp.setHeight(LinearLayout.LayoutParams.WRAP_CONTENT);
+        changeStatusPopUp.setFocusable(true);
+
+        // Some offset to align the popup a bit to the left, and a bit down, relative to button's position.
+        int OFFSET_X = -20;
+        int OFFSET_Y = 50;
+
+        //Clear the default translucent background
+        changeStatusPopUp.setBackgroundDrawable(new BitmapDrawable());
+
+        // Displaying the popup at the specified location, + offsets.
+        changeStatusPopUp.showAtLocation(layout, Gravity.NO_GRAVITY, p.x + OFFSET_X, p.y + OFFSET_Y);
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
