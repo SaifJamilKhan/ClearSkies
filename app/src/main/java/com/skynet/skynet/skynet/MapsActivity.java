@@ -651,7 +651,12 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                     }
 
                     airplaneMarkersAdded.add(mMap.addMarker(new MarkerOptions()
-                            .position(new LatLng(airplane.lat, airplane.lon)).rotation(airplane.heading).icon(BitmapDescriptorFactory.fromResource(R.drawable.blue_plane_thirty))));
+                            .position(new LatLng(airplane.lat, airplane.lon))
+                            .rotation(airplane.heading)
+                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.blue_plane_thirty))
+                            .title("Flight")
+                            .snippet("Altitude: " + Double.toString(airplane.altitude) + " km")
+                    ));
                 }
             }
         });
@@ -808,6 +813,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                         status = "warning";
                     }
                     unsafeReasons += "- An airplane is flying overhead\n";
+                    break;
                 }
             }
         }
