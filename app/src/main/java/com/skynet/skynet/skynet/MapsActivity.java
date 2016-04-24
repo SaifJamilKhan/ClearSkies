@@ -133,48 +133,48 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
 
         setSupportActionBar(myToolbar);
 
-//        myToolbar.findViewById(R.id.filter_menu_button).setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//
-////                int[] location = new int[2];
-////                v.getLocationOnScreen(location);
-//                //Initialize the Point with x, and y positions
-////                Point point = new Point();
-////                point.x = 0;
-////                point.y = 300;
-////                showStatusPopup(MapsActivity.this, point);
-//
-//                SkynetPopupMenu popup = new SkynetPopupMenu(MapsActivity.this, v);
-//                //Inflating the Popup using xml file
-//                popup.getMenuInflater()
-//                        .inflate(R.menu.main_menu, popup.getMenu());
-//
-//                //registering popup with OnMenuItemClickListener
-//                popup.setOnMenuItemClickListener(new SkynetPopupMenu.OnMenuItemClickListener() {
-//                    public boolean onMenuItemClick(MenuItem item) {
-//                        switch (item.getItemId()) {
-//                            case R.id.action_toggle_self_circle:
-//                                showSelfCircle = !showSelfCircle;
-//                                drawSelfCircle(showSelfCircle);
-//                                return true;
-//                            case R.id.action_toggle_airports:
-//                                showAirportCircles = !showAirportCircles;
-//                                drawAirportCircles(showAirportCircles);
-//                                return true;
-//                            case R.id.action_toggle_drones:
-//                                showDroneCircles = !showDroneCircles;
-//                                drawDroneCircles(showDroneCircles);
-//                                return true;
-//                        }
-//                        return true;
-//                    }
-//                });
-//
-//                popup.show(); //showing popup menu
-//                Log.v("saif", "on menu clicked ");
-//            }
-//        });
+        myToolbar.findViewById(R.id.filter_menu_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+//                int[] location = new int[2];
+//                v.getLocationOnScreen(location);
+                //Initialize the Point with x, and y positions
+//                Point point = new Point();
+//                point.x = 0;
+//                point.y = 300;
+//                showStatusPopup(MapsActivity.this, point);
+
+                SkynetPopupMenu popup = new SkynetPopupMenu(MapsActivity.this, v);
+                //Inflating the Popup using xml file
+                popup.getMenuInflater()
+                        .inflate(R.menu.main_menu, popup.getMenu());
+
+                //registering popup with OnMenuItemClickListener
+                popup.setOnMenuItemClickListener(new SkynetPopupMenu.OnMenuItemClickListener() {
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getItemId()) {
+                            case R.id.action_toggle_self_circle:
+                                showSelfCircle = !showSelfCircle;
+                                drawSelfCircle(showSelfCircle);
+                                return true;
+                            case R.id.action_toggle_airports:
+                                showAirportCircles = !showAirportCircles;
+                                drawAirportCircles(showAirportCircles);
+                                return true;
+                            case R.id.action_toggle_drones:
+                                showDroneCircles = !showDroneCircles;
+                                drawDroneCircles(showDroneCircles);
+                                return true;
+                        }
+                        return true;
+                    }
+                });
+
+                popup.show(); //showing popup menu
+                Log.v("saif", "on menu clicked ");
+            }
+        });
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME, MIN_DISTANCE, this); //You can also use LocationManager.GPS_PROVIDER and LocationManager.PASSIVE_PROVIDER
@@ -582,6 +582,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
 
     private void drawDrones(final ArrayList<Drone> drones) {
 
+        if(!showDroneCircles)
         this.runOnUiThread(new Runnable() {
             @Override
             public void run() {

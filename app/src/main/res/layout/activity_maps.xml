@@ -20,37 +20,44 @@
             android:layout_height="?attr/actionBarSize"
             android:layout_alignParentTop="true"
             android:elevation="4dp"
-            android:titleTextColor=""
+            android:titleTextColor="@android:color/white"
+            android:subtitleTextColor="@android:color/white"
             android:background="@color/nav_bar_color"
             android:theme="@style/ThemeOverlay.AppCompat.Light"
             android:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
-            <!--<LinearLayout-->
-                <!--android:orientation="horizontal"-->
-                <!--android:background="@null"-->
-                <!--android:paddingLeft="100dp"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:gravity="center_vertical"-->
-                <!--android:layout_height="wrap_content">-->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:background="@null"
+                android:layout_width="match_parent"
+                android:gravity="center_vertical"
+                android:layout_height="wrap_content">
 
-                <!--<Space-->
-                    <!--android:layout_width="0dp"-->
-                    <!--android:layout_height="0dp"-->
-                    <!--android:layout_weight="1"-->
-                    <!--/>-->
+                <TextView
+                    android:text="ClearSkies"
+                    android:textSize="20dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:textColor="@android:color/white"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    />
 
-                <!--<ImageButton-->
-                    <!--android:id="@+id/filter_menu_button"-->
-                    <!--android:src="@drawable/icon_menu_dropdown"-->
-                    <!--android:layout_marginRight="10dp"-->
-                    <!--android:padding="10dp"-->
-                    <!--android:scaleType="fitXY"-->
-                    <!--android:background="@null"-->
-                    <!--android:layout_marginEnd="5dp"-->
-                    <!--android:layout_width="40dp"-->
-                    <!--android:layout_height="40dp" />-->
+                <ImageButton
+                    android:id="@+id/filter_menu_button"
+                    android:src="@drawable/icon_menu_dropdown"
+                    android:layout_marginRight="10dp"
+                    android:padding="10dp"
+                    android:scaleType="fitXY"
+                    android:background="@null"
+                    android:layout_marginEnd="5dp"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp" />
 
-            <!--</LinearLayout>-->
+            </LinearLayout>
         </android.support.v7.widget.Toolbar>/
 
         <fragment

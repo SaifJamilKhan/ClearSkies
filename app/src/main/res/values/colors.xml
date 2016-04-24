@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="nav_bar_color" >#2c2f78</color>
-    <color name="stat_bar_color" >#434792</color>
+    <color name="nav_bar_color" >#4054B2</color>
+    <color name="stat_bar_color" >#31429D</color>
 
 </resources>
