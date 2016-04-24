@@ -208,7 +208,9 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override
             public void onCameraChange(CameraPosition cameraPosition) {
+                Log.v("saif", "got here");
                 if(!showDroneCircles && ! showAirportCircles) return;
+                Log.v("saif", "my team good");
                 try {
                     LatLng botleft = mMap.getProjection()
                             .getVisibleRegion().nearLeft;
@@ -222,9 +224,12 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                     LatLng topright = mMap.getProjection()
                             .getVisibleRegion().farRight;
 
+                    Log.v("saif", "first target is " + cameraPosition.target + " plus latest lat lng " + mLatestLocationLatLng);
                     if (almostEqualCoords(cameraPosition.target, mLatestLocationLatLng)) {
+                    Log.v("saif", "first target is " + cameraPosition.target + " plus latest lat lng " + mLatestLocationLatLng);
                         callCustomAPI(getCustomURL(botleft, botright, topleft, topright), true);
                     } else {
+                        Log.v("saif", "second target is " + cameraPosition.target + " plus latest lat lng " + mLatestLocationLatLng);
                         callCustomAPI(getCustomURL(botleft, botright, topleft, topright), false);
                     }
                 } catch (Exception e) {
@@ -585,7 +590,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                         }
                     }
 
-                    if (originalUpdates) {
+                    if ((originalAirports == null) && originalUpdates) {
                         System.out.println("OG");
                         originalAirports = airports;
                     }
@@ -595,7 +600,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                         drones.add(new Drone(jsonDrones.getJSONObject(i)));
                     }
 
-                    if (originalUpdates) {
+                    if ((originalDrones == null) && originalUpdates) {
                         originalDrones = drones;
                     }
 
@@ -616,7 +621,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     }
 
     private void drawAirplanes(final ArrayList<MapAirplane> mapAirPlanes) {
-        Log.v("saif", "airplanes " + mapAirPlanes.size());
 
         if(!showAirPlanes) return;
         this.runOnUiThread(new Runnable() {
@@ -643,7 +647,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                         return;
                     }
 
-                    Log.v("saif", "added airplane " + airplane.toString() + " " + airplane.lat + " " + airplane.lon + " " + airplane.heading);
                     airplaneMarkersAdded.add(mMap.addMarker(new MarkerOptions()
                             .position(new LatLng(airplane.lat, airplane.lon)).rotation(airplane.heading).icon(BitmapDescriptorFactory.fromResource(R.drawable.blue_plane_thirty))));
                 }
@@ -830,6 +833,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     }
 
     private static boolean almostEqualCoords(LatLng a, LatLng b){
-        return (Math.abs(a.latitude - b.latitude) < 0.0001) && (Math.abs(a.longitude - b.longitude) < 0.0001);
+        return (Math.abs(a.latitude - b.latitude) < 0.04) && (Math.abs(a.longitude - b.longitude) < 0.04);
     }
 }
