@@ -16,6 +16,7 @@ public class Airport {
     public double lat;
     public double lon;
     public int sizeLevel; // 0 = small, 1 = medium, 2 = large
+    public int radius;
 
 
     public Airport(JSONObject jsonObject) {
@@ -29,16 +30,20 @@ public class Airport {
             this.size = jsonObject.getString("size");
             switch (size) {
                 case "small":
-                    sizeLevel = 0;
+                    this.sizeLevel = 0;
+                    this.radius = 5630; // 3.5 miles
                     break;
                 case "medium":
-                    sizeLevel = 1;
+                    this.sizeLevel = 1;
+                    this.radius = 8046; // 6.5 miles
                     break;
                 case "large":
-                    sizeLevel = 2;
+                    this.sizeLevel = 2;
+                    this.radius = 11000; // 8.5 miles
                     break;
                 default:
-                    sizeLevel = 0;
+                    this.sizeLevel = 0;
+                    this.radius = 5630; // 3.5 miles
                     break;
             }
         } catch (JSONException e) {

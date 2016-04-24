@@ -513,22 +513,10 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                     if (x > 20) {
                         break;
                     }
-                    int radius = 0;
-                    switch (airport.sizeLevel) {
-                        case 0:
-                            radius = 5630;// 3.5 miles
-                            break;
-                        case 1:
-                            radius = 8046;// 6.5 miles
-                            break;
-                        case 2:
-                            radius = 11000;// 8.5 miles
-                            break;
 
-                    }
                     circlesAdded.add(mMap.addCircle(new CircleOptions()
                             .center(new LatLng(airport.lat, airport.lon))
-                            .radius(radius) // this is in meters
+                            .radius(airport.radius) // this is in meters
                             .strokeColor(Color.BLUE)
                             .fillColor(0x732200ff)));
                 }
@@ -585,15 +573,34 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     }
 
     private void fillBottomSheet() {
+        String status = "safe";
+        String unsafeReasons = "";
+
+        final double windSpeed = weatherData.windSpeed;
+        final int temp = (int) Math.round(weatherData.temp);
+        final int pressure = (int) Math.round(weatherData.pressure);
+        final double humidity = weatherData.humidity;
+
+        if (airports != null) {
+            for (Airport airport : airports) {
+                double distBetween = DistanceCalculator.distance(0.0, 0.0, airport.lat, airport.lon, "k");
+                if (distBetween <= (4000 + airport.radius)) {
+                    status = "unsafe";
+                    unsafeReasons += "- You are too close to an airport";
+                    break;
+                }
+            }
+        }
+
         MapsActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 flying_conditions.setText("Safe flying conditions");
-                wind_speed_text.setText("Wind speed: " + Double.toString(weatherData.windSpeed) + " km/h");
+                wind_speed_text.setText("Wind speed: " + Double.toString(windSpeed) + " km/h");
                 wind_direction_text.setText("Wind direction: " + weatherData.windDirectionCardinal);
-                temperature_text.setText("Temperature: " + Integer.toString((int) Math.round(weatherData.temp)) + "°C");
-                pressure_text.setText("Pressure: " + Integer.toString((int) Math.round(weatherData.pressure)) + " hpa");
-                humidity_text.setText("Humidity: " + Double.toString(weatherData.humidity) + "%");
+                temperature_text.setText("Temperature: " + Integer.toString(temp) + "°C");
+                pressure_text.setText("Pressure: " + Integer.toString(pressure) + " hpa");
+                humidity_text.setText("Humidity: " + Double.toString(humidity) + "%");
             }
         });
     }
