@@ -21,5 +21,10 @@
         android:title="Toggle Self Circle"
         app:showAsAction="never"/>
 
+    <item
+        android:id="@+id/action_toggle_airplanes"
+        android:icon="@drawable/ic_cast_light"
+        android:title="Toggle Flights"
+        app:showAsAction="never"/>
 
 </menu>

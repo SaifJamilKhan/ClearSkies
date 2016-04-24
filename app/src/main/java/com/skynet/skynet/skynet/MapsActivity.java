@@ -42,10 +42,14 @@ import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.json.JSONArray;
@@ -88,6 +92,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
 
     private ArrayList<Circle> circlesAdded = new ArrayList<>() ;
     private ArrayList<Circle> droneCirclesAdded = new ArrayList<>() ;
+    private ArrayList<Marker> airplaneMarkersAdded = new ArrayList<>() ;
     private LatLng mLatestLocationLatLng;
     private PopupWindow changeStatusPopUp;
 
@@ -98,6 +103,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     private int temp;
     private int pressure;
     private double humidity;
+    private ArrayList<MapAirplane> mapAirPlanes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -271,6 +277,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     boolean showSelfCircle = true;
     boolean showDroneCircles = true;
     boolean showAirportCircles = true;
+    boolean showAirPlanes = true;
 
     // The method that displays the popup.
     private void showStatusPopup(final Activity context, Point p) {
@@ -333,8 +340,23 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                 showDroneCircles = !showDroneCircles;
                 drawDroneCircles(showDroneCircles);
                 return true;
+            case R.id.action_toggle_airplanes:
+                showAirPlanes = !showAirPlanes;
+                drawAirplaneCircles(showAirPlanes);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void drawAirplaneCircles(boolean showAirPlanes) {
+        if(showAirPlanes) {
+            drawAirplanes(mapAirPlanes);
+        } else {
+            for(Marker marker : airplaneMarkersAdded) {
+                marker.remove();
+            }
+            airplaneMarkersAdded.clear();
         }
     }
 
@@ -531,21 +553,66 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                     JSONObject responseObject = new JSONObject(response.body().string());
                     JSONArray jsonAirports = responseObject.getJSONArray("airportsin");
                     JSONArray jsonDrones = responseObject.getJSONArray("dronesin");
+                    JSONArray jsonFlights = responseObject.getJSONArray("flightsin");
                     airports = new ArrayList<>();
                     for (int i = 0; i < jsonAirports.length(); i++) {
                         if (jsonAirports.getJSONObject(i).has("lat") && jsonAirports.getJSONObject(i).has("lon")) {
                             airports.add(new Airport(jsonAirports.getJSONObject(i)));
                         }
                     }
-                    drawAirports(airports);
+
                     drones = new ArrayList<Drone>();
                     for (int i = 0; i < jsonAirports.length(); i++) {
                         drones.add(new Drone(jsonDrones.getJSONObject(i)));
                     }
+
+                    mapAirPlanes = new ArrayList<MapAirplane>();
+                    for (int i = 0; i < jsonFlights.length(); i++) {
+                        mapAirPlanes.add(new MapAirplane(jsonFlights.getJSONObject(i)));
+                    }
+
+                    drawAirports(airports);
                     drawDrones(drones);
+                    drawAirplanes(mapAirPlanes);
                     fillBottomSheet();
                 } catch (JSONException e) {
                     e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    private void drawAirplanes(final ArrayList<MapAirplane> mapAirPlanes) {
+        Log.v("saif", "airplanes " + mapAirPlanes.size());
+
+        if(!showAirPlanes) return;
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                ArrayList<MapAirplane> airplanesToAdd = new ArrayList<>();
+                int b = 0;
+                while(airplanesToAdd.size() < 100 && b < mapAirPlanes.size()) {
+                    airplanesToAdd.add(mapAirPlanes.get(b));
+                    b++;
+                }
+                for(Marker marker : airplaneMarkersAdded) {
+                    for(int x = 0; x < airplanesToAdd.size(); x ++) {
+                        MapAirplane airplane = airplanesToAdd.get(x);
+                        if(marker.getPosition().longitude == airplane.lon && marker.getPosition().latitude == airplane.lat) {
+                            airplanesToAdd.remove(airplane);
+                        }
+                    }
+                }
+                for (int y = 0; y < airplanesToAdd.size(); y++) {
+                    MapAirplane airplane = airplanesToAdd.get(y);
+                    if (y > 20) {
+                        return;
+                    }
+
+                    Log.v("saif", "added airplane " + airplane.toString() + " " + airplane.lat + " " + airplane.lon + " " + airplane.heading);
+                    airplaneMarkersAdded.add(mMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(airplane.lat, airplane.lon)).rotation(airplane.heading).icon(BitmapDescriptorFactory.fromResource(R.drawable.blue_air_plane))));
                 }
             }
         });
