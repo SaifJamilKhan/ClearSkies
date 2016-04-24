@@ -73,6 +73,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     private WeatherData weatherData;
     private ArrayList<Airport> airports;
     private ArrayList<Drone> drones;
+    private ArrayList<Airport> originalAirports;
+    private ArrayList<Drone> originalDrones;
     private TextView flying_conditions, wind_speed_text, wind_direction_text, temperature_text, pressure_text, humidity_text, visibility_text, precip_probability_text;
     private TextView warnings_title, safety_reasons;
     private ImageButton changingButton, openPanelButton;
@@ -210,7 +212,11 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                     LatLng topright = mMap.getProjection()
                             .getVisibleRegion().farRight;
 
-                    callCustomAPI(getCustomURL(botleft, botright, topleft, topright));
+                    if (almostEqualCoords(cameraPosition.target, mLatestLocationLatLng)) {
+                        callCustomAPI(getCustomURL(botleft, botright, topleft, topright), true);
+                    } else {
+                        callCustomAPI(getCustomURL(botleft, botright, topleft, topright), false);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -472,7 +478,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(mLatestLocationLatLng, 10);
         mMap.animateCamera(cameraUpdate);
         locationManager.removeUpdates(this);
-        createCircleAroundPoint(mLatestLocationLatLng);
         try {
             callWeatherAPI(getWeatherURL(mLatestLocationLatLng.latitude, mLatestLocationLatLng.longitude));
         } catch (Exception e) {
@@ -540,7 +545,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                 + topRight.latitude + "&lon4=" + topRight.longitude;
     }
 
-    private void callCustomAPI(String url) throws Exception {
+    private void callCustomAPI(String url, final boolean originalUpdates) throws Exception {
         Request request = new Request.Builder()
                 .url(url)
                 .build();
@@ -567,9 +572,18 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                         }
                     }
 
+                    if (originalUpdates) {
+                        System.out.println("OG");
+                        originalAirports = airports;
+                    }
+
                     drones = new ArrayList<Drone>();
                     for (int i = 0; i < jsonAirports.length(); i++) {
                         drones.add(new Drone(jsonDrones.getJSONObject(i)));
+                    }
+
+                    if (originalUpdates) {
+                        originalDrones = drones;
                     }
 
                     mapAirPlanes = new ArrayList<MapAirplane>();
@@ -743,21 +757,21 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
             }
         }
 
-        if ((airports != null) && (mLatestLocationLatLng != null)) {
-            for (Airport airport : airports) {
+        if ((originalAirports != null) && (mLatestLocationLatLng != null)) {
+            for (Airport airport : originalAirports) {
                 double distBetween = DistanceCalculator.distance(mLatestLocationLatLng.latitude, mLatestLocationLatLng.longitude, airport.lat, airport.lon, "k");
-                if (distBetween <= (4000 + airport.radius)) {
+                if ((distBetween * 1000.0) <= (4000 + airport.radius)) {
                     status = "unsafe";
                     unsafeReasons += "- You are too close to " + airport.name + "\n";
                 }
             }
         }
 
-        if ((drones != null) && (mLatestLocationLatLng != null)) {
-            for (int i = 0; i < drones.size(); i++) {
-                Drone drone = drones.get(i);
+        if ((originalDrones != null) && (mLatestLocationLatLng != null)) {
+            for (int i = 0; i < originalDrones.size(); i++) {
+                Drone drone = originalDrones.get(i);
                 double distBetween = DistanceCalculator.distance(mLatestLocationLatLng.latitude, mLatestLocationLatLng.longitude, drone.lat, drone.lon, "k");
-                if (distBetween <= (4000 + drone.radius)) {
+                if ((distBetween * 1000.0) <= (4000 + drone.radius)) {
                     if (!status.equals("unsafe")) {
                         status = "warning";
                     }
@@ -800,5 +814,9 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                 safety_reasons.setText(unsafeReasons);
             }
         });
+    }
+
+    private static boolean almostEqualCoords(LatLng a, LatLng b){
+        return (Math.abs(a.latitude - b.latitude) < 0.0001) && (Math.abs(a.longitude - b.longitude) < 0.0001);
     }
 }
