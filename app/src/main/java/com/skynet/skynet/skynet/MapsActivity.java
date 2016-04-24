@@ -557,22 +557,10 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
 
                 for(int y = 0; y < dronesToAdd.size(); y ++) {
                     Drone drone = dronesToAdd.get(y);
-                    int radius = 0;
-                    switch (drone.sizeLevel) {
-                        case 0:
-                            radius = 5630;// 3.5 miles
-                            break;
-                        case 1:
-                            radius = 8046;// 6.5 miles
-                            break;
-                        case 2:
-                            radius = 11000;// 8.5 miles
-                            break;
 
-                    }
                     droneCirclesAdded.add(mMap.addCircle(new CircleOptions()
                             .center(new LatLng(drone.lat, drone.lon))
-                            .radius(radius) // this is in meters
+                            .radius(drone.radius) // this is in meters
                             .strokeColor(0x7322ff00)
                             .fillColor(0x73227700)));
                 }
