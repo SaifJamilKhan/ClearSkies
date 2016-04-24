@@ -585,7 +585,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                         }
                     }
 
-                    if (originalUpdates) {
+                    if ((originalAirports == null) && originalUpdates) {
                         System.out.println("OG");
                         originalAirports = airports;
                     }
@@ -595,7 +595,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                         drones.add(new Drone(jsonDrones.getJSONObject(i)));
                     }
 
-                    if (originalUpdates) {
+                    if ((originalDrones == null) && originalUpdates) {
                         originalDrones = drones;
                     }
 
