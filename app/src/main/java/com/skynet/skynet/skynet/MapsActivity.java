@@ -651,7 +651,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                             .center(new LatLng(airport.lat, airport.lon))
                             .radius(airport.radius) // this is in meters
                             .strokeWidth(0)
-                            .fillColor(0x80f37c20)));
+                            .fillColor(0x80db3126)));
                 }
             }
         });
@@ -688,7 +688,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                             .center(new LatLng(drone.lat, drone.lon))
                             .radius(drone.radius) // this is in meters
                             .strokeWidth(0)
-                            .fillColor(0x80db3126)));
+                            .fillColor(0x80f37c20)));
                 }
             }
         });
