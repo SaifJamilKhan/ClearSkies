@@ -535,7 +535,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     }
 
     private String getCustomURL(LatLng botLeft, LatLng botRight, LatLng topLeft, LatLng topRight) {
-        return "https://skynet-server.herokuapp.com/airportsin?lat1=" + botLeft.latitude + "&lon1=" + botLeft.longitude
+        return "https://clear-skies.herokuapp.com/airportsin?lat1=" + botLeft.latitude + "&lon1=" + botLeft.longitude
                 + "&lat2=" + botRight.latitude + "&lon2=" + botRight.longitude + "&lat3=" + topLeft.latitude + "&lon3=" + topLeft.longitude + "&lat4="
                 + topRight.latitude + "&lon4=" + topRight.longitude;
     }
