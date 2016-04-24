@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -25,13 +26,7 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.ImageView;
 import android.widget.Toast;
-import android.content.Intent;
-import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
 import butterknife.Bind;
@@ -178,6 +173,18 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                                 showDroneCircles = !showDroneCircles;
                                 drawDroneCircles(showDroneCircles);
                                 return true;
+                            case R.id.action_toggle_fake_location:
+                                Location location = new Location("Test");
+                                location.setLatitude(mMap.getCameraPosition().target.latitude);
+                                location.setLongitude(mMap.getCameraPosition().target.longitude);
+                                onLocationChanged(location);
+//                                location.setTime(System.currentTimeMillis());
+//                                location.setAccuracy(1);
+//                                location.setElapsedRealtimeNanos(100);
+//                                locationManager.setTestProviderLocation("Test", location);
+//                                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME, MIN_DISTANCE, MapsActivity.this); //You can also use LocationManager.GPS_PROVIDER and LocationManager.PASSIVE_PROVIDER
+
+                                return true;
                         }
                         return true;
                     }
@@ -189,6 +196,9 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         });
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+//        locationManager.removeTestProvider("Test");
+//        locationManager.addTestProvider("Test", false, false, false, false, false, false, false, Criteria.POWER_LOW, Criteria.ACCURACY_FINE);
+//        locationManager.setTestProviderEnabled("Test", true);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME, MIN_DISTANCE, this); //You can also use LocationManager.GPS_PROVIDER and LocationManager.PASSIVE_PROVIDER
 
         context = this;
@@ -457,6 +467,9 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
     private void createCircleAroundPoint(LatLng latlng) {
         if(!showSelfCircle) return;
 
+        if(mCircle != null) {
+            mCircle.remove();
+        }
             mCircle = mMap.addCircle(new CircleOptions()
                     .center(latlng)
                     .radius(4000) // this is in meters
@@ -618,7 +631,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
 
                     Log.v("saif", "added airplane " + airplane.toString() + " " + airplane.lat + " " + airplane.lon + " " + airplane.heading);
                     airplaneMarkersAdded.add(mMap.addMarker(new MarkerOptions()
-                            .position(new LatLng(airplane.lat, airplane.lon)).rotation(airplane.heading).icon(BitmapDescriptorFactory.fromResource(R.drawable.blue_air_plane))));
+                            .position(new LatLng(airplane.lat, airplane.lon)).rotation(airplane.heading).icon(BitmapDescriptorFactory.fromResource(R.drawable.blue_plane_thirty))));
                 }
             }
         });

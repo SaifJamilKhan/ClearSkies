@@ -27,4 +27,10 @@
         android:title="Toggle Flights"
         app:showAsAction="never"/>
 
+    <item
+        android:id="@+id/action_toggle_fake_location"
+        android:icon="@drawable/ic_cast_light"
+        android:title="Update Location"
+        app:showAsAction="never"/>
+
 </menu>
