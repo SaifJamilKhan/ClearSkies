@@ -681,8 +681,7 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                 double distBetween = DistanceCalculator.distance(mLatestLocationLatLng.latitude, mLatestLocationLatLng.longitude, airport.lat, airport.lon, "k");
                 if (distBetween <= (4000 + airport.radius)) {
                     status = "unsafe";
-                    unsafeReasons += "- You are too close to an airport\n";
-                    break;
+                    unsafeReasons += "- You are too close to " + airport.name + "\n";
                 }
             }
         }
