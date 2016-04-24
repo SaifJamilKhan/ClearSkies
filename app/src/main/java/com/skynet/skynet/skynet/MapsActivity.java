@@ -8,8 +8,11 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.menu.MenuBuilder;
+import android.support.v7.view.menu.MenuPresenter;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -89,7 +92,62 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         setUpMapIfNeeded();
         mMap.setMyLocationEnabled(true);
         myToolbar.setTitle("Hermes");
+
+        myToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                SkynetPopupMenu popup = new SkynetPopupMenu(MapsActivity.this, item.getActionView());
+                //Inflating the Popup using xml file
+                popup.getMenuInflater()
+                        .inflate(R.menu.main_menu, popup.getMenu());
+
+                //registering popup with OnMenuItemClickListener
+                popup.setOnMenuItemClickListener(new SkynetPopupMenu.OnMenuItemClickListener() {
+                    public boolean onMenuItemClick(MenuItem item) {
+                        Toast.makeText(
+                                MapsActivity.this,
+                                "You Clicked : " + item.getTitle(),
+                                Toast.LENGTH_SHORT
+                        ).show();
+                        Log.v("saif", "camera change event called");
+                        return true;
+                    }
+                });
+
+                popup.show(); //showing popup menu
+                Log.v("saif", "on menu clicked ");
+                return true;
+            }
+        });
+
         setSupportActionBar(myToolbar);
+
+        myToolbar.findViewById(R.id.filter_menu_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                PopupMenu popup = new PopupMenu(MapsActivity.this, v);
+                //Inflating the Popup using xml file
+                popup.getMenuInflater()
+                        .inflate(R.menu.main_menu, popup.getMenu());
+
+                //registering popup with OnMenuItemClickListener
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    public boolean onMenuItemClick(MenuItem item) {
+                        Toast.makeText(
+                                MapsActivity.this,
+                                "You Clicked : " + item.getTitle(),
+                                Toast.LENGTH_SHORT
+                        ).show();
+                        Log.v("saif", "camera change event called");
+                        return true;
+                    }
+                });
+
+                popup.show(); //showing popup menu
+                Log.v("saif", "on menu clicked ");
+            }
+        });
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME, MIN_DISTANCE, this); //You can also use LocationManager.GPS_PROVIDER and LocationManager.PASSIVE_PROVIDER
@@ -112,7 +170,6 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
                     LatLng topright = mMap.getProjection()
                             .getVisibleRegion().farRight;
 
-                    Log.v("saif", "camera change event called");
                     callCustomAPI(getCustomURL(botleft, botright, topleft, topright));
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -129,20 +186,41 @@ public class MapsActivity extends AppCompatActivity implements LocationListener 
         recyclerView.setAdapter(adapter);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main_menu, menu);
-        return true;
-    }
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        MenuInflater inflater = getMenuInflater();
+//        inflater.inflate(R.menu.main_menu, menu);
+//        return true;
+//    }
 
     boolean showSelfCircle = true;
     boolean showDroneCircles = true;
     boolean showAirportCircles = true;
 
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
+//        PopupMenu popup = new PopupMenu(MapsActivity.this, item.getActionView());
+//        //Inflating the Popup using xml file
+//        popup.getMenuInflater()
+//                .inflate(R.menu.main_menu, popup.getMenu());
+//
+//        //registering popup with OnMenuItemClickListener
+//        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+//            public boolean onMenuItemClick(MenuItem item) {
+//                Toast.makeText(
+//                        MapsActivity.this,
+//                        "You Clicked : " + item.getTitle(),
+//                        Toast.LENGTH_SHORT
+//                ).show();
+//                return true;
+//            }
+//        });
+//
+//        popup.show(); //showing popup menu
+
+//
         switch (item.getItemId()) {
             case R.id.action_toggle_self_circle:
                 showSelfCircle = !showSelfCircle;
